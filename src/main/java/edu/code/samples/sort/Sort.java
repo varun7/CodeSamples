@@ -6,12 +6,27 @@ import java.util.Random;
 
 public class Sort {
 
-    public static void quickSort(int [] array, int size) {
-        _quickSort(array, 0, size-1);
+    public static int findKthSmallestElement(int [] array, int k) {
+        return _findKthSmallestElement(array, 0, array.length -1, k);
     }
 
-    public static void mergeSort(int [] array, int size) {
-        _mergeSort(array, 0, size-1);
+    public static void quickSort(int [] array) {
+        _quickSort(array, 0, array.length-1);
+    }
+
+    public static void mergeSort(int [] array) {
+        _mergeSort(array, 0, array.length-1);
+    }
+
+    private static int _findKthSmallestElement(int [] array, int left, int right, int k) {
+        int absolutePartitionIndex = randomPivotSelect(array, left, right);
+        if (absolutePartitionIndex == k) {
+            return array[absolutePartitionIndex];
+        } else if (absolutePartitionIndex < k) {
+            return _findKthSmallestElement(array, absolutePartitionIndex + 1, right, k);
+        } else {
+            return _findKthSmallestElement(array, left, absolutePartitionIndex - 1, k);
+        }
     }
 
     private static void _quickSort(int [] array, int left, int right) {
