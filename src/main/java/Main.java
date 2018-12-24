@@ -1,4 +1,5 @@
 import edu.code.samples.ds.Heap;
+import edu.code.samples.ds.Tree;
 import edu.code.samples.sort.Sort;
 
 import static edu.code.samples.generic.Utils.createRandomIntArray;
@@ -11,7 +12,8 @@ public class Main {
 //        mergeSortDemo();
 //        kthSelectionDemo();
 //        heapDemo();
-        heapSortDemo();
+//        heapSortDemo();
+        bstDemo();
     }
 
     private static void mergeSortDemo() {
@@ -64,6 +66,22 @@ public class Main {
         heap.delete();
         heap.delete();
         System.out.println("Minimum element = " + heap.peek());
+    }
+
+    private static void bstDemo() {
+        Tree.BinarySearchTree bst = new Tree.BinarySearchTree();
+        bst.insert(50);
+        bst.insert(60);
+        bst.insert(30);
+        bst.insert(10);
+        bst.insert(70);
+        bst.insert(120);
+        bst.insert(0);
+        bst.insert(140);
+        System.out.println("\n Recursive preorder");
+        bst.inorderTraversal(bst.root);
+        System.out.println("\n Iterative preorder");
+        bst.iterativeInorderTraversal(bst.root);
     }
 
 }
