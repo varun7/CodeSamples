@@ -71,17 +71,53 @@ public class Main {
     private static void bstDemo() {
         Tree.BinarySearchTree bst = new Tree.BinarySearchTree();
         bst.insert(50);
-        bst.insert(60);
         bst.insert(30);
-        bst.insert(10);
         bst.insert(70);
-        bst.insert(120);
-        bst.insert(0);
-        bst.insert(140);
-        System.out.println("\n Recursive preorder");
-        bst.inorderTraversal(bst.root);
-        System.out.println("\n Iterative preorder");
+        bst.insert(20);
+        bst.insert(10);
+        bst.insert(40);
+        bst.insert(45);
+        bst.insert(70);
+        bst.insert(60);
+        bst.insert(80);
+
+        bst.rootToLeafPath(10);
+
+        bst.lowestCommonAncestor(30, 40);
+
+        System.out.println("\n \n Recursive preorder");
+        bst.inorderTraversal();
+
+        System.out.println("\n \n Iterative preorder");
         bst.iterativeInorderTraversal(bst.root);
+
+        bst.lengthOfLongestLeafToLeafPath();
+
+        System.out.println("\n \n Is 180 present " + bst.search(bst.root, 180));
+        System.out.println("\n \n Is 30 present" + bst.search(bst.root, 30));
+
+        int [] inorder = {20,30,35,40,45,50,60,70,80};
+        int [] preorder = {50,30,20,40,35,45,70,60,80};
+        System.out.println("\n\n Constructed binary tree from traversals: ");
+        Tree.BinarySearchTree tree = new Tree.BinarySearchTree();
+        tree.constructBSTFromInAndPreOrder(inorder, preorder, inorder.length);
+        tree.inorderTraversal();
+
+        int array[] = {50,30,20,40,35,45,70,60,80};
+        bst.bstEncoding(array, array.length, 35);
+
+        int [] preorderTraversal = {50,30,20,40,35,45,70,60,80};
+        Tree.BinarySearchTree fromPreOrderTree = new Tree.BinarySearchTree();
+        fromPreOrderTree.constructBSTFromPreorder(preorderTraversal);
+        fromPreOrderTree.inorderTraversal();
+        fromPreOrderTree.postOrderTraversal();
+    }
+
+    private static void printList(Tree.Node head) {
+        System.out.println("Printing linked list");
+        while (head != null) {
+            System.out.print(" " + head.data);
+        }
     }
 
 }
