@@ -6,6 +6,38 @@ import java.util.Random;
 
 public class Sort {
 
+    public static int binarySearchRotatedArray(int[] array, int element) {
+        int low = 0;
+        int end = array.length - 1;
+        int mid;
+        while (low <= end) {
+            mid = (low + end)/2;
+            if (array[mid] == element) {
+                return mid;
+            }
+
+            if (isPresentInRightSubarray(array, low, mid, end, element)) {
+                low = mid+1;
+            } else {
+                end = mid-1;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean isPresentInRightSubarray(int [] array, int low, int mid, int end, int element) {
+        if (array[mid] < array[end] && element >= array[mid] && element <= array[end]) {
+            // Right sub-array is sorted.
+            return true;
+        } else {
+            // Left array is sorted, check if element is not present in that then it should be in right half.
+            if (!(element >= array[low] && element <= array[mid])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static int findKthSmallestElement(int [] array, int k) {
         return _findKthSmallestElement(array, 0, array.length -1, k);
     }

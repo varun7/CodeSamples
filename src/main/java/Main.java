@@ -1,3 +1,4 @@
+import edu.code.samples.ds.Graph;
 import edu.code.samples.ds.Heap;
 import edu.code.samples.ds.Tree;
 import edu.code.samples.sort.Sort;
@@ -13,7 +14,11 @@ public class Main {
 //        kthSelectionDemo();
 //        heapDemo();
 //        heapSortDemo();
-        bstDemo();
+//        bstDemo();
+//        binarySearchDemo();
+//        graphDemo();
+//        directedGraphDemo();
+        weightedGraphDemo();
     }
 
     private static void mergeSortDemo() {
@@ -68,6 +73,13 @@ public class Main {
         System.out.println("Minimum element = " + heap.peek());
     }
 
+    private static void binarySearchDemo() {
+        System.out.println("\n\n Performing binary search in rotated sorted array: ");
+        int array[] = {9,1,2,3,4,5,6,7,8};
+        int element = 8;
+        System.out.print(" element " + element + " is present at index = " + Sort.binarySearchRotatedArray(array, element));
+    }
+
     private static void bstDemo() {
         Tree.BinarySearchTree bst = new Tree.BinarySearchTree();
         bst.insert(50);
@@ -118,6 +130,93 @@ public class Main {
         while (head != null) {
             System.out.print(" " + head.data);
         }
+    }
+
+    private static void graphDemo() {
+        System.out.println("\n \nGraph demo");
+        Graph<Integer> graph = new Graph.AdjacencyListGraph<>();
+        graph.insert(1);
+        graph.insert(2);
+        graph.insert(3);
+        graph.insert(4);
+        graph.insert(5);
+        graph.connect(1,2);
+        graph.connect(1,3);
+        graph.connect(2,4);
+        graph.connect(3,4);
+        graph.connect(4,5);
+
+        System.out.print("\nAll vertices in graph: ");
+        graph.vertices().stream().forEach(v -> System.out.print(v + " "));
+
+        System.out.print("\nSuccessors of node 5 are : ");
+        graph.successors(5).forEach(v -> System.out.print(v + " "));
+
+        System.out.print("\nPredecessors of node 1 are : ");
+        graph.predecessors(1).forEach(v -> System.out.print(v + " "));
+
+        System.out.print("\nEdge weight of node between 1 and 2 : " + graph.edgeWeight(1,2));
+
+        System.out.print("\nBFS element " + 1 + " in graph : " + graph.bfs(1, 1));
+
+        System.out.print("\nDFS element " + 1 + " in graph : " + graph.bfs(1, 5));
+
+        System.out.println("\n\n");
+    }
+
+    private static void directedGraphDemo() {
+        Graph<Integer> directedGraph = new Graph.AdjacencyListGraph<>(true);
+        directedGraph.insert(1);
+        directedGraph.insert(2);
+        directedGraph.insert(3);
+        directedGraph.insert(4);
+        directedGraph.connect(1,2);
+        directedGraph.connect(1,4);
+        directedGraph.connect(2,3);
+        directedGraph.connect(3,1);
+        directedGraph.connect(4,5);
+        directedGraph.connect(5,6);
+        directedGraph.connect(6,7);
+        directedGraph.connect(6,8);
+        directedGraph.connect(7,4);
+        directedGraph.connect(8,9);
+
+        System.out.print("\n[Directed] Successors of node 5 are : ");
+        directedGraph.successors(5).forEach(v -> System.out.print(v + " "));
+
+        System.out.print("\n[Directed] Predecessors of node 1 are : ");
+        directedGraph.predecessors(1).forEach(v -> System.out.print(v + " "));
+
+        System.out.print("\n[Directed] Topological sort of graph : ");
+        directedGraph.topologicalSort();
+
+        System.out.print("\n[Directed] Is graph cyclic: " + directedGraph.isCyclic());
+
+        System.out.println("\n[Directed] Strongly connected commponents are:");
+        directedGraph.stronglyConnectedComponents();
+
+        System.out.println("\n\n");
+    }
+
+    private static void weightedGraphDemo() {
+        Graph<Integer> weightedGraph = new Graph.AdjacencyListGraph<>(true);
+        weightedGraph.insert(1);
+        weightedGraph.insert(2);
+        weightedGraph.insert(3);
+        weightedGraph.insert(4);
+        weightedGraph.connect(1,2, 1.0);
+        weightedGraph.connect(1,3, 4.0);
+        weightedGraph.connect(2,3, 2.0);
+        weightedGraph.connect(2,4, 5.0);
+        weightedGraph.connect(3,4, 4.0);
+
+        System.out.println("\n[Weighted] Dijkstra single source shortest path:");
+        int source = 1;
+        weightedGraph.singleSourceShortestPathDijkstra(source).entrySet().stream().forEach(e -> {
+            System.out.println("Distance from " +  source + " to " + e.getKey() + " is : " + e.getValue());
+        });
+
+        System.out.println("\n\n");
     }
 
 }
