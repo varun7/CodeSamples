@@ -289,7 +289,26 @@ public class Main {
 
         System.out.println("\n\nMaximum sum of non-consecutive elements in array is : " + UnclassifiedDP.maximumNonConsecutiveSum());
 
-        System.out.println("\n\nMaximum longest increasing subsequence : " + Sequences.longestIncreasingSubsequence());
+        System.out.println("\n\nLength longest increasing subsequence : " + Sequences.longestIncreasingSubsequence());
+
+        System.out.println("\n\nLength of longest common subsequence : " + Sequences.longestCommonSubsequence("BANANA", "ATANA"));
+
+        String a = "BANANA";
+        String b = "ATANA";
+        Sequences.printLongestCommonSubsequence(a,b);
+        System.out.print(" is the Longest common subsequence between " + a + " and " + b + "\n\n");
+
+        String lps = "BANANA";
+        Sequences.printLongestPalindromicSequence(lps);
+        System.out.print(" is the longest palindromic subsequence in " + lps);
+
+        int [] array = {1,3,5,8,9,2,6,7,6,8,9};
+        System.out.print("\n\nMinimum jumps to reach array end is: " + UnclassifiedDP.minimumJumps(array));
+
+        int [][] squareMatrixInput = {{0,1,1,0,1}, {1,1,0,1,0}, {0,1,1,1,0}, {1,1,1,1,0}, {1,1,1,1,1}, {0,0,0,0,0}};
+        System.out.print("\n\nSize of maximum square sub matrix is: " + UnclassifiedDP.maximumSquareMatrix(squareMatrixInput));
+
+        System.out.println("\n\n");
     }
 
 }

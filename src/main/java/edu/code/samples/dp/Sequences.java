@@ -1,5 +1,7 @@
 package edu.code.samples.dp;
 
+import edu.code.samples.generic.Utils;
+
 public class Sequences {
     /**
      * Given two strings of size m,n and set of operations replace (R), insert (I) and delete (D)
@@ -16,22 +18,12 @@ public class Sequences {
                 } else if (s1.charAt(i-1) == s2.charAt(j-1)) {
                     dp[i][j] = dp[i-1][j-1];
                 } else {
-                    dp[i][j] = minimum(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1;
+                    dp[i][j] = Utils.minimum(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1;
                 }
             }
         }
 
         return dp[s1.length()][s2.length()];
-    }
-
-    private static int minimum(int a, int b, int c) {
-        if (a <= b && a <= c) {
-            return a;
-        }
-        if (b <=c) {
-            return b;
-        }
-        return c;
     }
 
     /**
@@ -92,5 +84,93 @@ public class Sequences {
             }
         }
         return max == -1? 1 : max + 1;
+    }
+
+    /**
+     * The longest common subsequence problem is to find the longest subsequence common to
+     * all subsequences in a set of sequences (often just two). Note that subsequences is different
+     * from a substring.
+     * It is the basis of file comparison programs such as diff, and has application in bioinformatics.
+     */
+    public static int longestCommonSubsequence(String s1, String s2) {
+        int [][] dp = new int[s1.length() + 1][s2.length() + 1];
+        for (int i=0; i<=s1.length(); i++) {
+            for (int j=0; j<=s2.length(); j++) {
+                if (i==0 || j==0) {
+                    dp[i][j] = 0;
+                } else if(s1.charAt(i-1) == s2.charAt(j-1)) {
+                    dp[i][j] = 1 + dp[i-1][j-1];
+                } else {
+                    dp[i][j] = Integer.max(dp[i-1][j], dp[i][j-1]);
+                }
+            }
+        }
+        return dp[s1.length()][s2.length()];
+    }
+
+    static class Node {
+        public static final int LEFT = -1, TOP = 1, DIAGONAL = 0;
+        public int value;
+        public int direction; // -1 means left, 1 top and 0 means diagonal.
+
+        public Node (int value, int direction) {
+            this.value = value;
+            this.direction = direction;
+        }
+    }
+
+    // This print only one but can be augmented to print all longest subsequences.
+    // when both left and top are equal weight we are always moving to LEFT
+    // By making direction as list, we can move both top and left.
+    public static void printLongestCommonSubsequence(String s1, String s2) {
+
+        Node [][] dp = new Node[s1.length() + 1][s2.length() + 1];
+        for (int i=0; i<=s1.length(); i++) {
+            for (int j=0; j<=s2.length(); j++) {
+                if (i==0 || j==0) {
+                    dp[i][j] = new Node(0, Node.LEFT);
+                } else if(s1.charAt(i-1) == s2.charAt(j-1)) {
+                    dp[i][j] = new Node(1 + dp[i-1][j-1].value, Node.DIAGONAL);
+                } else {
+                    if (dp[i-1][j].value > dp[i][j-1].value) {
+                        dp[i][j] = new Node(dp[i-1][j].value, Node.LEFT);
+                    } else {
+                        dp[i][j] = new Node(dp[i][j-1].value, Node.TOP);
+                    }
+
+                }
+            }
+        }
+        followAndPrint(s1, s2, dp);
+    }
+
+    private static void followAndPrint(String s1, String s2, Node[][] dp) {
+
+        int i = s1.length(), j = s2.length();
+        while (i > 0 && j > 0) {
+            if (dp[i][j].direction == Node.LEFT) {
+                i--;
+            } else if (dp[i][j].direction == Node.TOP) {
+                j--;
+            } else {
+                System.out.print(s1.charAt(i-1));
+                i--; j--;
+            }
+        }
+    }
+
+    /**
+     * Given a string print the longest palindromic subsequence in it.
+     */
+    public static void printLongestPalindromicSequence(String str) {
+        printLongestCommonSubsequence(str, reverseString(str));
+    }
+
+    private static String reverseString(String str) {
+        StringBuilder build = new StringBuilder();
+        for (int i=str.length()-1; i>=0; i--) {
+            build.append(str.charAt(i));
+        }
+        return build.toString();
     }
 }

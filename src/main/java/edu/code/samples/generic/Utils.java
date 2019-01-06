@@ -24,4 +24,14 @@ public final class Utils {
         }
         return array;
     }
+
+    public static int minimum(int a, int b, int c) {
+        if (a <= b && a <= c) {
+            return a;
+        }
+        if (b <=c) {
+            return b;
+        }
+        return c;
+    }
 }

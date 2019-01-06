@@ -1,5 +1,7 @@
 package edu.code.samples.dp;
 
+import edu.code.samples.generic.Utils;
+
 public class UnclassifiedDP {
 
     private final static int SECOND = 1;
@@ -65,5 +67,53 @@ public class UnclassifiedDP {
             dp [i] = Integer.max(dp[i-1], dp[i-2] + array[i]);
         }
         return dp[array.length-1];
+    }
+
+    /**
+     * Given an array of integers where each elements represents the max number of steps that can be
+     * made forward from that element. Write a function to return the minimum number of jumps to reach
+     * the end of the array (starting from the first element). If an element is 0, then cannot move through that element.
+     */
+    public static int minimumJumps(int[] array) {
+        int dp[] = new int[array.length];
+        dp[0] = 0;
+
+        for (int i=1; i<dp.length; i++) {
+            int min = Integer.MAX_VALUE - 1;
+            for (int j=i-1; j >=0 ; j--) {
+                if (i - j <= array[j] && dp[j] < min) {
+                    min = dp[j];
+                }
+                dp[i] = min + 1;
+            }
+        }
+
+        return dp[array.length-1];
+    }
+
+    /**
+     * Given a binary matrix, find out the maximum size squar sub-matrix with all 1s.
+     */
+    public static int maximumSquareMatrix(int [][]matrix) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int [][]dp = new int[rows][cols];
+
+        int maxSubMatrixSize = Integer.MIN_VALUE;
+        for (int i=0; i < rows; i++) {
+            for (int j=0; j<cols; j++) {
+                if (i==0 || j ==0) {
+                    dp[i][j] = matrix[i][j];
+                } else if (matrix[i][j] == 1) {
+                    dp[i][j] = Utils.minimum(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]) + 1;
+                } else {
+                    dp[i][j] = 0;
+                }
+                if (dp[i][j] > maxSubMatrixSize) {
+                    maxSubMatrixSize = dp[i][j];
+                }
+            }
+        }
+        return maxSubMatrixSize;
     }
 }
