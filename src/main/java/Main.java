@@ -1,7 +1,14 @@
+import edu.code.samples.dp.Knapsack;
+import edu.code.samples.dp.MatrixPath;
+import edu.code.samples.dp.Sequences;
+import edu.code.samples.dp.UnclassifiedDP;
 import edu.code.samples.ds.Graph;
 import edu.code.samples.ds.Heap;
 import edu.code.samples.ds.Tree;
+import edu.code.samples.ds.UnionFind;
 import edu.code.samples.sort.Sort;
+
+import java.util.Arrays;
 
 import static edu.code.samples.generic.Utils.createRandomIntArray;
 import static edu.code.samples.generic.Utils.printArray;
@@ -18,7 +25,9 @@ public class Main {
 //        binarySearchDemo();
 //        graphDemo();
 //        directedGraphDemo();
-        weightedGraphDemo();
+//        weightedGraphDemo();
+//        unionFindDemo();
+        dpDemo();
     }
 
     private static void mergeSortDemo() {
@@ -140,11 +149,14 @@ public class Main {
         graph.insert(3);
         graph.insert(4);
         graph.insert(5);
-        graph.connect(1,2);
-        graph.connect(1,3);
-        graph.connect(2,4);
-        graph.connect(3,4);
-        graph.connect(4,5);
+        graph.connect(1,2, 1.0d);
+        graph.connect(1,3, 7.0d);
+        graph.connect(2,3, 5.0d);
+        graph.connect(2,4, 4.0d);
+        graph.connect(2,5, 3.0d);
+        graph.connect(3,5, 6.0d);
+        graph.connect(4,5, 2.0d);
+
 
         System.out.print("\nAll vertices in graph: ");
         graph.vertices().stream().forEach(v -> System.out.print(v + " "));
@@ -160,6 +172,9 @@ public class Main {
         System.out.print("\nBFS element " + 1 + " in graph : " + graph.bfs(1, 1));
 
         System.out.print("\nDFS element " + 1 + " in graph : " + graph.bfs(1, 5));
+
+        System.out.println("\n[Weighted] Minimum spanning tree, prims");
+        graph.mstPrims();
 
         System.out.println("\n\n");
     }
@@ -217,6 +232,64 @@ public class Main {
         });
 
         System.out.println("\n\n");
+    }
+
+    private static void unionFindDemo() {
+        UnionFind<Integer> rankedUnion = new UnionFind.RankedUnion<>(Arrays.asList(1,2,3,4,5,6,7));
+        System.out.println("Leader of 1 = " + rankedUnion.find(1).leader + " rank = " + rankedUnion.find(1).rank);
+        System.out.println("Leader of 2 = " + rankedUnion.find(2).leader + " rank = " + rankedUnion.find(2).rank);
+
+        rankedUnion.union(1,2);
+        System.out.println("\n\nMerging 1 and 2");
+        System.out.println("Leader of 1 = " + rankedUnion.find(1).leader + " rank = " + rankedUnion.find(1).rank);
+        System.out.println("Leader of 2 = " + rankedUnion.find(2).leader + " rank = " + rankedUnion.find(2).rank);
+
+        rankedUnion.union(2,3);
+        System.out.println("\n\nMerging 2 and 3");
+        System.out.println("Leader of 2 = " + rankedUnion.find(2).leader + " rank = " + rankedUnion.find(2).rank);
+        System.out.println("Leader of 3 = " + rankedUnion.find(3).leader + " rank = " + rankedUnion.find(3).rank);
+
+        rankedUnion.union(4,5);
+        System.out.println("\n\nMerging 4 and 5");
+        System.out.println("Leader of 4 = " + rankedUnion.find(4).leader + " rank = " + rankedUnion.find(4).rank);
+        System.out.println("Leader of 5 = " + rankedUnion.find(5).leader + " rank = " + rankedUnion.find(5).rank);
+
+        rankedUnion.union(2,5);
+        System.out.println("\n\nMerging 4 and 5");
+        System.out.println("Leader of 2 = " + rankedUnion.find(2).leader + " rank = " + rankedUnion.find(2).rank);
+        System.out.println("Leader of 5 = " + rankedUnion.find(5).leader + " rank = " + rankedUnion.find(5).rank);
+
+        System.out.println("\n\nMerging 1 and 5");
+        rankedUnion.union(1,5);
+    }
+
+    private static void dpDemo() {
+        int [] weights = {10, 20, 30};
+        int [] values = {60, 100, 120};
+        int W = 50;
+        System.out.println("\nKnapsack problem bottom-up solution = " + Knapsack.tabulatedMaximumValue(values, weights, W));
+        System.out.println("\nKnapsack problem top-down solution = " + Knapsack.memoizedMaximumValue(values, weights, W));
+
+        int cost[][] = {{10,5,15}, {20,40,10}, {30,10,2}};
+        int endx = 1;
+        int endy = 2;
+        System.out.println("\n\nMinimum cost path from (0,0) to (" + endx + " ," + endy + ") is " + MatrixPath.cheapestPath(endx, endy, cost));
+        System.out.println("\n\nWays to reach (" + endx + " ," + endy + ") from (0,0) is " + MatrixPath.numberOfPaths(endx, endy));
+
+        int matrix[][] = {{1,1,1}, {1,0,1},{1,0,0}};
+        System.out.println("\n\nWays to reach (" + endx + " ," + endy + ") from (0,0) is " + MatrixPath.numberOfPathsWithObstacles(endx, endy, matrix));
+
+        String s1 = "Sunday", s2 = "Saturday";
+        System.out.println("\n\nMinimum lenenshtein distance between " + s1 + " and " + s2 + " is : " + Sequences.levenshteinDistances(s1,s2));
+
+        String s = "abcda";
+        System.out.println("\n\nMinimum insertion for converting " + s + " to palindrome is : " + Sequences.minimumInsertionForPalindrom(s));
+
+        System.out.println("\n\nLength of maximum chain is : " + UnclassifiedDP.maxChainLength());
+
+        System.out.println("\n\nMaximum sum of non-consecutive elements in array is : " + UnclassifiedDP.maximumNonConsecutiveSum());
+
+        System.out.println("\n\nMaximum longest increasing subsequence : " + Sequences.longestIncreasingSubsequence());
     }
 
 }

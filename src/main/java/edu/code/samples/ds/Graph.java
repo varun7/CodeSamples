@@ -44,6 +44,8 @@ public interface Graph<V> {
 
     Map<V, Double> singleSourceShortestPathDijkstra(V source);
 
+    void mstPrims();
+
     /**
      * Only for directed graph.
      */
@@ -323,8 +325,11 @@ public interface Graph<V> {
             // Initializations.
             final Double INF = Double.MAX_VALUE - 1;
             Set<V> explored = new HashSet<>();
-            Set<V> unexplored = this.vertices().stream().collect(Collectors.toSet()); // Creates a copy of vertices.
-            Map<V, Double> distances = this.vertices().stream().filter(v ->  v != source).collect(Collectors.toMap(v -> v, v -> INF));
+            // Creates a copy of set of vertices.
+            Set<V> unexplored = this.vertices().stream().collect(Collectors.toSet());
+            Map<V, Double> distances = this.vertices().stream()
+                                            .filter(v ->  v != source)
+                                            .collect(Collectors.toMap(v -> v, v -> INF));
             distances.put(source, 0d);
 
             // We will take one vertex from unexplored and move it to explored set.
@@ -364,16 +369,37 @@ public interface Graph<V> {
                     .get();
         }
 
-        private void validateAndUpdateDistanceOfNeighbors(V candidate, Set<V> explored, Map<V, Double> distances) {
-            // Revisit distance of all neighbors
-            this.successors(candidate).stream()
-                    .filter(v -> explored.contains(v)) // check only vertices that are explored.
-                    .forEach(v -> {
-                        Double neighborDistance = distances.get(v);
-                        if (neighborDistance > distances.get(candidate) + this.edgeWeight(candidate, v)) {
-                            neighborDistance = distances.get(candidate) + this.edgeWeight(candidate, v); // Since they share the reference, it should update value in Map.
-                        }
-                    });
+        @Override
+        public void mstPrims() {
+            // Step-1 initializations.
+            V source = this.vertices().stream().findAny().get();
+            Set<V> unexplored = this.vertices().stream()
+                    .filter(v -> v != source)
+                    .collect(Collectors.toSet());
+            Set<V> explored = new HashSet<>();
+            Map<V, Double> distances = unexplored.stream()
+                    .collect(Collectors.toMap(v -> v, v -> Double.MAX_VALUE -1 ));
+            distances.put(source, 0d);
+
+            // At every iteration we move a vertex from unexplored to explored set.
+            while (!unexplored.isEmpty()) {
+                // Step-2: Pick unexplored vertex at minimum distance from explored set of vertices.
+                V candidate = minimumDistanceVertex(explored, distances);
+                explored.add(candidate);
+                unexplored.remove(candidate);
+
+                System.out.println(candidate + " cost = " + distances.get(candidate));
+
+                // Step-3: For the newly explored vertex re-compute the distances.
+                this.successors(candidate).stream()
+                        .filter(v -> !explored.contains(v))
+                        .forEach(v -> {
+                            double neighborDistance = this.edgeWeight(candidate, v);
+                            if (neighborDistance < distances.get(v)) {
+                                distances.put(v, neighborDistance);
+                            }
+                        });
+            }
         }
 
         private V nextUnexploredNode(Set<V> explored) {
