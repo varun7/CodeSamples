@@ -1,11 +1,14 @@
+import edu.code.samples.bits.BitsQuestions;
 import edu.code.samples.dp.Knapsack;
 import edu.code.samples.dp.MatrixPath;
 import edu.code.samples.dp.Sequences;
 import edu.code.samples.dp.UnclassifiedDP;
 import edu.code.samples.ds.Graph;
 import edu.code.samples.ds.Heap;
+import edu.code.samples.ds.SegmentTree;
 import edu.code.samples.ds.Tree;
 import edu.code.samples.ds.UnionFind;
+import edu.code.samples.generic.KMP;
 import edu.code.samples.sort.Sort;
 
 import java.util.Arrays;
@@ -27,7 +30,10 @@ public class Main {
 //        directedGraphDemo();
 //        weightedGraphDemo();
 //        unionFindDemo();
-        dpDemo();
+//        dpDemo();
+//        kmpDemo();
+//        bitsDemo();
+        segmentTreeDemo();
     }
 
     private static void mergeSortDemo() {
@@ -311,4 +317,23 @@ public class Main {
         System.out.println("\n\n");
     }
 
+    private static void kmpDemo() {
+        String text = "varun sharma", pattern = "arn";
+        System.out.println("\n\n" + text + " contains " + pattern + " = " + KMP.contains(text, pattern));
+    }
+
+    private static void bitsDemo() {
+        int n1 = -2, n2 = 15;
+        System.out.println("\n\n" + n1 + " + " + n2 + " = " + BitsQuestions.add(n1, n2));
+        System.out.println("Max of " + n1 + " , " + n2 + " is : " + BitsQuestions.max(n1, n2));
+    }
+
+    private static void segmentTreeDemo() {
+        int [] array = {1,3,5,8,9,2};
+        SegmentTree tree = new SegmentTree.SumSegTree(array);
+        int i = 1, j = 5;
+        System.out.println("\n\nSum of interval " + i + " to " + j + " = " + tree.query(i,j));
+        tree.update(3,10);
+        System.out.println("\n\nSum of interval " + i + " to " + j + " = " + tree.query(i,j));
+    }
 }
