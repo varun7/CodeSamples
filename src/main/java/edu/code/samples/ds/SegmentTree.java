@@ -92,4 +92,87 @@ public interface SegmentTree {
             }
         }
     }
+
+    class MaxSegTree implements SegmentTree {
+
+        private int[] tree;
+        private int[] input;
+
+        public MaxSegTree(int[] input) {
+            this.input = input;
+            tree = new int[elementsInCompleteBinaryTree(input.length)];
+            constructTree(0, input.length-1, 0);
+        }
+
+        private int elementsInCompleteBinaryTree(int n) {
+            int height = (int) Math.ceil(Math.log(n)/Math.log(2));
+            return 1 << (height+1);
+        }
+
+        @Override
+        public int query(int start, int end) {
+            return _query(start, end, 0, input.length-1, 0);
+        }
+
+        private int _query(int start, int end, int l, int r, int index) {
+            // case-1: complete overlap
+            if (l == start && r == end) {
+                return tree[index];
+            }
+
+            int mid = l + (r-l)/2, lChild = 2 * index +1, rChild = 2 * index + 2;
+
+            // case-2: if completely in left
+            if (start >= l && end <= mid) {
+                return _query(start, end, l, mid, lChild);
+            }
+
+            // case-3: if completely in right
+            if (start >= mid+1 && end <= r) {
+                return _query(start, end, mid+1, r, rChild);
+            }
+
+            // case-4: if partial overlap.
+            return Math.max(
+                    _query(start, mid, l, mid, lChild),
+                    _query(mid+1, end, mid+1, r, rChild)
+            );
+        }
+
+        @Override
+        public void update(int index, int value) {
+            _update(0, input.length-1, 0, index, value);
+        }
+
+        private void _update(int l, int r, int indexInTree, int indexInInput, int value) {
+            if (l == r) {
+                tree[indexInTree] = value;
+                input[indexInInput] = value;
+                return;
+            }
+
+            int mid = l + (r-l)/2, lChild = 2*indexInTree+1, rChild = 2*indexInTree+2;
+            // when element is in left
+            if (indexInInput >= l && indexInTree <= mid) {
+                _update(l, mid, lChild, indexInInput, value);
+            }
+
+            if (indexInInput >=mid+1 && indexInInput <= r) {
+                _update(mid+1,r, rChild, indexInInput, value);
+            }
+            tree[indexInTree] = Math.max(tree[lChild], tree[rChild]);
+        }
+
+        private void constructTree(int start, int end, int index) {
+            if (start == end) {
+                tree[index] = input[start];
+                return;
+            }
+
+            int mid = start + (end-start)/2, lChild = 2*index+1, rChild = 2*index+2;
+            constructTree(start, mid, lChild);
+            constructTree(mid+1, end, rChild);
+            tree[index] = Math.max(tree[lChild], tree[rChild]);
+        }
+    }
 }

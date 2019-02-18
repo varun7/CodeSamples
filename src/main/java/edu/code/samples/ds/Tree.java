@@ -1,5 +1,7 @@
 package edu.code.samples.ds;
 
+import java.util.Stack;
+
 public interface Tree {
 
     class Node {
@@ -111,39 +113,41 @@ public interface Tree {
         }
 
         public void iterativePreorderTraversal(Node root) {
-            Node[] stack = new Node[50];
-            int top = 0;
             Node node = root;
+            Stack<Node> nodeStack = new Stack<>();
+            while (node != null) {
+                // process root
+                System.out.print(" " + node.data);
 
-            while (true) {
-                if (node != null) {
-                    System.out.print(" " + node.data);
-                    stack[top++] = node;
+                if (node.right != null) {
+                    nodeStack.push(node.right);
+                }
+
+                if (node.left != null) {
                     node = node.left;
                 } else {
-                    if (top <= 0) {
-                        return;
+                    node = null;
+                    if (!nodeStack.isEmpty()) {
+                        node = nodeStack.pop();
                     }
-                    node = stack[--top];
-                    node = node.right;
                 }
             }
         }
 
         public void iterativeInorderTraversal(Node root) {
-            Node[] stack = new Node[50];
-            int top = 0;
+            Stack<Node> stack = new Stack<>();
             Node node = root;
-
-            while (true) {
+            while(true) {
                 if (node != null) {
-                    stack[top++] = node;
+                    stack.push(node);
                     node = node.left;
                 } else {
-                    if (top <= 0) {
+                    if (stack.isEmpty()) {
                         return;
                     }
-                    node = stack[--top];
+
+                    node = stack.pop();
+                    // Process node.
                     System.out.print(" " + node.data);
                     node = node.right;
                 }
@@ -151,6 +155,29 @@ public interface Tree {
         }
 
         public void iterativePostorderTraversal(Node root) {
+            Stack<Node> stack = new Stack<>();
+            Node node = root, prev = null;
+            while (true) {
+                if (node!=null) {
+                    stack.push(node);
+                    node = node.left;
+                } else {
+                    if (stack.isEmpty()) {
+                        return;
+                    }
+                    node = stack.peek();
+                    if (node.right != null && node.right != prev) {
+                        node = node.right;
+                    } else  {
+                        // If there is no right child or right child is already processed.
+                        // then process this node.
+                        stack.pop();
+                        prev = node;
+                        System.out.print(" " + node.data);
+                        node = null;
+                    }
+                }
+            }
         }
 
         int pIndex = 0;
@@ -199,7 +226,6 @@ public interface Tree {
             _constructBSTFromPreorder(newNode, lowerBound, newNode.data, preorder);
             _constructBSTFromPreorder(newNode, newNode.data, upperBound, preorder);
         }
-
 
         private static int searchArray(int[] inorder, int start, int end, int element) {
             for (int i=start; i <= end; i++) {

@@ -3,15 +3,30 @@ import edu.code.samples.dp.Knapsack;
 import edu.code.samples.dp.MatrixPath;
 import edu.code.samples.dp.Sequences;
 import edu.code.samples.dp.UnclassifiedDP;
+import edu.code.samples.ds.BinaryIndexedTree;
+import edu.code.samples.ds.BinaryIndexedTree2D;
 import edu.code.samples.ds.Graph;
 import edu.code.samples.ds.Heap;
+import edu.code.samples.ds.IntervalSearchTree;
 import edu.code.samples.ds.SegmentTree;
 import edu.code.samples.ds.Tree;
 import edu.code.samples.ds.UnionFind;
+import edu.code.samples.generic.InversionPair;
 import edu.code.samples.generic.KMP;
+import edu.code.samples.judges.InterviewBit;
 import edu.code.samples.sort.Sort;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 import static edu.code.samples.generic.Utils.createRandomIntArray;
 import static edu.code.samples.generic.Utils.printArray;
@@ -34,6 +49,10 @@ public class Main {
 //        kmpDemo();
 //        bitsDemo();
         segmentTreeDemo();
+//        binaryIndexedTreeDemo();
+//        intervalSearchTreeDemo();
+//        demoInversionPair();
+//        test();
     }
 
     private static void mergeSortDemo() {
@@ -113,10 +132,24 @@ public class Main {
         bst.lowestCommonAncestor(30, 40);
 
         System.out.println("\n \n Recursive preorder");
-        bst.inorderTraversal();
+        bst.preorderTraversal();
 
         System.out.println("\n \n Iterative preorder");
+        bst.iterativePreorderTraversal(bst.root);
+
+        System.out.println("\n \n Recursive inorder");
+        bst.inorderTraversal();
+
+        System.out.println("\n \n Iterative inorder");
         bst.iterativeInorderTraversal(bst.root);
+
+
+        System.out.println("\n \n Recursive postOrder");
+        bst.postOrderTraversal();
+
+        System.out.println("\n \n Iterative postOrder");
+        bst.iterativePostorderTraversal(bst.root);
+
 
         bst.lengthOfLongestLeafToLeafPath();
 
@@ -131,7 +164,7 @@ public class Main {
         tree.inorderTraversal();
 
         int array[] = {50,30,20,40,35,45,70,60,80};
-        bst.bstEncoding(array, array.length, 35);
+        bst.bstEncoding(array, array.length, 60);
 
         int [] preorderTraversal = {50,30,20,40,35,45,70,60,80};
         Tree.BinarySearchTree fromPreOrderTree = new Tree.BinarySearchTree();
@@ -335,5 +368,57 @@ public class Main {
         System.out.println("\n\nSum of interval " + i + " to " + j + " = " + tree.query(i,j));
         tree.update(3,10);
         System.out.println("\n\nSum of interval " + i + " to " + j + " = " + tree.query(i,j));
+
+        int [] input = {1,3,5,8,9,2};
+        int l = 0, r = 5;
+        SegmentTree rangeSegTree = new SegmentTree.MaxSegTree(array);
+        System.out.println("\n\nMax in range" + l + " to " + r + " = " + rangeSegTree.query(l,r));
+        rangeSegTree.update(1,20);
+        System.out.println("\n\nMax in range" + l + " to " + r + " = " + rangeSegTree.query(l,r));
+    }
+
+    private static void binaryIndexedTreeDemo() {
+        int [] array = {1,0,2,1,1,3,0,4,2,5,2,2,3,1,0,2};
+        BinaryIndexedTree tree = new BinaryIndexedTree(array);
+        int i = 5;
+        System.out.println("\n\nSum of first " + i + " elements = " + tree.query(i));
+
+        int [][] matrix = {{1, 2, 3, 4},
+                           {5, 6, 7, 8},
+                           {9, 10, 11, 12},
+                           {13, 14, 15, 16}};
+        BinaryIndexedTree2D twoDTree = new BinaryIndexedTree2D(matrix);
+        int x = 1, y = 2;
+        // Treat as array starts from 1,1
+        System.out.println("\n\nSum of matrix (1,1) to (" +  x + " , " + y + ") = " + twoDTree.query(x, y));
+    }
+
+    private static void intervalSearchTreeDemo() {
+        IntervalSearchTree tree = new IntervalSearchTree();
+        tree.put(2,10, 4);
+        tree.put(3,5, 5);
+        tree.put(0,2, 4);
+        tree.put(7,12, 4);
+
+        int p = 5, q=7;
+        List<IntervalSearchTree.IntervalNode> nodes = tree.overlappingIntervals(p,q);
+
+        System.out.println("\n\nPrinting intervals overlapping with (" + p + " , " + q + ") is/are: ");
+        printIntervals(nodes);
+    }
+
+    private static void printIntervals(List<IntervalSearchTree.IntervalNode> nodes) {
+        nodes.forEach(n -> {
+            System.out.print(" (" + n.low + " , " + n.high + ")  ");
+        });
+    }
+
+    private static void demoInversionPair() {
+        InversionPair pairs = new InversionPair();
+        int[] input = {50,20,10,10};
+        System.out.println("Number of inversion pairs = " + pairs.countInversions(input));
+    }
+
+    private static void test() {
     }
 }

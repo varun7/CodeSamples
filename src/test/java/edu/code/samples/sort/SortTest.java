@@ -1,10 +1,10 @@
 package edu.code.samples.sort;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class SortTest {
 
-    int[]  unsortedArray = new int [] {};
-
-
+    @Test
+    public void test() {
+    }
 }

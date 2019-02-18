@@ -2,7 +2,7 @@ package edu.code.samples.ds;
 
 import static edu.code.samples.generic.Utils.swap;
 
-public interface Heap {
+public interface Heap<T> {
 
     boolean isFull();
 
