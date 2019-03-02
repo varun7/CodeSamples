@@ -84,8 +84,8 @@ public class UnclassifiedDP {
                 if (i - j <= array[j] && dp[j] < min) {
                     min = dp[j];
                 }
-                dp[i] = min + 1;
             }
+            dp[i] = min + 1;
         }
 
         return dp[array.length-1];

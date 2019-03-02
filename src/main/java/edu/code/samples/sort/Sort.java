@@ -38,64 +38,8 @@ public class Sort {
         return false;
     }
 
-    public static int findKthSmallestElement(int [] array, int k) {
-        return _findKthSmallestElement(array, 0, array.length -1, k);
-    }
-
     public static void quickSort(int [] array) {
         _quickSort(array, 0, array.length-1);
-    }
-
-    public static void mergeSort(int [] array) {
-        _mergeSort(array, 0, array.length-1);
-    }
-
-    public static void heapSort(int [] array) {
-        createHeap(array);
-        _heapSort(array, array.length - 1);
-    }
-
-    private static void _heapSort(int [] array, int n) {
-        for (int i = n ; i >= 0 ; i--) {
-            swap(array, 0, i);
-            maxHeapify(array, 0, i);
-        }
-    }
-
-    private static void createHeap(int [] array) {
-        for (int i = array.length/2; i >= 0; i--) {
-            maxHeapify(array, i, array.length);
-        }
-    }
-
-    private static void maxHeapify(int [] array, int index, int heapSize) {
-        int lChildIndex = 2 * index + 1;
-        int rChildIndex = 2 * index + 2;
-        int smaller = index;
-
-        if (lChildIndex < heapSize && array[lChildIndex] > array[smaller]) {
-            smaller = lChildIndex;
-        }
-
-        if (rChildIndex < heapSize && array[rChildIndex] > array[smaller]) {
-            smaller = rChildIndex;
-        }
-
-        if (smaller != index) {
-            swap(array, smaller, index);
-            maxHeapify(array, smaller, heapSize);
-        }
-    }
-
-    private static int _findKthSmallestElement(int [] array, int left, int right, int k) {
-        int absolutePartitionIndex = randomPivotSelect(array, left, right);
-        if (absolutePartitionIndex == k) {
-            return array[absolutePartitionIndex];
-        } else if (absolutePartitionIndex < k) {
-            return _findKthSmallestElement(array, absolutePartitionIndex + 1, right, k);
-        } else {
-            return _findKthSmallestElement(array, left, absolutePartitionIndex - 1, k);
-        }
     }
 
     private static void _quickSort(int [] array, int left, int right) {
@@ -128,6 +72,10 @@ public class Sort {
         }
 
         return pivotIndex;
+    }
+
+    public static void mergeSort(int [] array) {
+        _mergeSort(array, 0, array.length-1);
     }
 
     private static void _mergeSort(int [] array, int left, int right) {
@@ -168,4 +116,57 @@ public class Sort {
             s++;
         }
     }
+
+    public static void heapSort(int [] array) {
+        createHeap(array);
+        _heapSort(array, array.length - 1);
+    }
+
+    private static void _heapSort(int [] array, int n) {
+        for (int i = n ; i >= 0 ; i--) {
+            swap(array, 0, i);
+            maxHeapify(array, 0, i);
+        }
+    }
+
+    private static void createHeap(int [] array) {
+        for (int i = array.length/2; i >= 0; i--) {
+            maxHeapify(array, i, array.length);
+        }
+    }
+
+    private static void maxHeapify(int [] array, int index, int heapSize) {
+        int lChildIndex = 2 * index + 1;
+        int rChildIndex = 2 * index + 2;
+        int smaller = index;
+
+        if (lChildIndex < heapSize && array[lChildIndex] > array[smaller]) {
+            smaller = lChildIndex;
+        }
+
+        if (rChildIndex < heapSize && array[rChildIndex] > array[smaller]) {
+            smaller = rChildIndex;
+        }
+
+        if (smaller != index) {
+            swap(array, smaller, index);
+            maxHeapify(array, smaller, heapSize);
+        }
+    }
+
+    public static int findKthSmallestElement(int [] array, int k) {
+        return _findKthSmallestElement(array, 0, array.length -1, k);
+    }
+
+    private static int _findKthSmallestElement(int [] array, int left, int right, int k) {
+        int absolutePartitionIndex = randomPivotSelect(array, left, right);
+        if (absolutePartitionIndex == k) {
+            return array[absolutePartitionIndex];
+        } else if (absolutePartitionIndex < k) {
+            return _findKthSmallestElement(array, absolutePartitionIndex + 1, right, k);
+        } else {
+            return _findKthSmallestElement(array, left, absolutePartitionIndex - 1, k);
+        }
+    }
+
 }

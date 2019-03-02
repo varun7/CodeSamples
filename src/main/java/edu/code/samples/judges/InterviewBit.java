@@ -204,6 +204,7 @@ public class InterviewBit {
     }
 
     /**
+     * https://www.interviewbit.com/problems/max-distance/
      * Given an array A of integers, find the maximum of j - i subjected to the constraint of A[i] <= A[j].
      *
      * If there is no solution possible, return -1.
@@ -793,7 +794,10 @@ public class InterviewBit {
      * https://www.geeksforgeeks.org/painters-partition-problem/
      * https://www.geeksforgeeks.org/painters-partition-problem-set-2/
      *
-     * You have to paint N boards of length {A0, A1, A2, A3 … AN-1}. There are K painters available and you are also given how much time a painter takes to paint 1 unit of board. You have to get this job done as soon as possible under the constraints that any painter will only paint contiguous sections of board.
+     * You have to paint N boards of length {A0, A1, A2, A3 … AN-1}.
+     * There are K painters available and you are also given how much time a painter takes to paint 1 unit of board.
+     * You have to get this job done as soon as possible under the constraints that any painter will only paint
+     * contiguous sections of board.
      *
      * 2 painters cannot share a board to paint. That is to say, a board
      * cannot be painted partially by one painter, and partially by another.

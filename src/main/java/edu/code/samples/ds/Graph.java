@@ -269,7 +269,11 @@ public interface Graph<V> {
             ancestor.add(startingVertex);
 
             for(V vertex: this.successors(startingVertex)) {
-                if (explored.contains(vertex) && _isCyclic(vertex, explored, ancestor)) {
+                // check for self-loop.
+                if (vertex == startingVertex) {
+                    return true;
+                }
+                if (!explored.contains(vertex) && _isCyclic(vertex, explored, ancestor)) {
                     return true;
                 }
             }
@@ -326,7 +330,7 @@ public interface Graph<V> {
             final Double INF = Double.MAX_VALUE - 1;
             Set<V> explored = new HashSet<>();
             // Creates a copy of set of vertices.
-            Set<V> unexplored = this.vertices().stream().collect(Collectors.toSet());
+            Set<V> unexplored = new HashSet<>(this.vertices());
             Map<V, Double> distances = this.vertices().stream()
                                             .filter(v ->  v != source)
                                             .collect(Collectors.toMap(v -> v, v -> INF));
@@ -341,7 +345,7 @@ public interface Graph<V> {
                 unexplored.remove(candidate);
 
                 // Revisit distance of all neighbors of candidate.
-                this.successors(candidate).stream()
+                this.successors(candidate)
                         .forEach(v -> {
                             Double neighborDistance = distances.get(candidate) + this.edgeWeight(candidate, v);
                             if (distances.get(v) > neighborDistance) {
@@ -355,7 +359,7 @@ public interface Graph<V> {
 
         private V minimumDistanceVertex(Set<V> explored, final Map<V, Double> distances) {
             Comparator<V> comparator = (o1, o2) -> {
-                if (distances.get(o1) == distances.get(o2)) {
+                if (distances.get(o1).doubleValue() == distances.get(o2).doubleValue()) {
                     return 0;
                 } else if (distances.get(o1) > distances.get(o2)) {
                     return 1;
@@ -364,7 +368,7 @@ public interface Graph<V> {
                 }
             };
             return this.vertices().stream()
-                    .filter(v -> !explored.contains(v))
+                    .filter(v -> !explored.contains(v)) // this is same as unexplored set, we can use that directly.
                     .min(comparator)
                     .get();
         }

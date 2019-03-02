@@ -13,20 +13,11 @@ import edu.code.samples.ds.Tree;
 import edu.code.samples.ds.UnionFind;
 import edu.code.samples.generic.InversionPair;
 import edu.code.samples.generic.KMP;
-import edu.code.samples.judges.InterviewBit;
 import edu.code.samples.sort.Sort;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
 
 import static edu.code.samples.generic.Utils.createRandomIntArray;
 import static edu.code.samples.generic.Utils.printArray;
@@ -48,7 +39,7 @@ public class Main {
 //        dpDemo();
 //        kmpDemo();
 //        bitsDemo();
-        segmentTreeDemo();
+//        segmentTreeDemo();
 //        binaryIndexedTreeDemo();
 //        intervalSearchTreeDemo();
 //        demoInversionPair();
@@ -323,6 +314,7 @@ public class Main {
 
         String s = "abcda";
         System.out.println("\n\nMinimum insertion for converting " + s + " to palindrome is : " + Sequences.minimumInsertionForPalindrom(s));
+        System.out.println("\n\nMinimum insertion for converting " + s + " to palindrome is : " + Sequences.tabulatedLongestPalindromicSubsequence(s));
 
         System.out.println("\n\nLength of maximum chain is : " + UnclassifiedDP.maxChainLength());
 
@@ -419,6 +411,14 @@ public class Main {
         System.out.println("Number of inversion pairs = " + pairs.countInversions(input));
     }
 
+    class Pair {
+        char ch;
+        int count;
+    }
     private static void test() {
+        String s;
+        Comparator<Pair> comparator = (a,b) -> {
+            return a.count - b.count;
+        };
     }
 }

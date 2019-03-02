@@ -35,6 +35,14 @@ public final class Utils {
         }
     }
 
+    public static String reverseString(String str) {
+        StringBuilder build = new StringBuilder();
+        for (int i=str.length()-1; i>=0; i--) {
+            build.append(str.charAt(i));
+        }
+        return build.toString();
+    }
+
     private static <T> void _printMatrix(T[][] matrix) {
         for (int i=0; i < matrix.length; i++) {
             System.out.println();

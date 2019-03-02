@@ -52,7 +52,7 @@ public interface UnionFind<V> {
             if (node == nodeLeader.leader) {
                 return nodeLeader;
             }
-            return find(nodeLeader.leader);
+            return _find(nodeLeader.leader);
         }
 
         @Override

@@ -13,7 +13,8 @@ public class InterviewBitTest {
         input.add(5000);
         input.add(5000);
         InterviewBit.RemoveDuplicatesFromSortedList solution = new InterviewBit.RemoveDuplicatesFromSortedList();
-        System.out.println(solution.removeDuplicates(input));
+
+        System.out.println("-ve mode is " + -5 % 2);
     }
 
 }
