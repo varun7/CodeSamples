@@ -1,7 +1,5 @@
 package edu.code.samples.judges;
 
-import javafx.util.Pair;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -209,6 +207,25 @@ public class LeetCodeProblems {
      * So there are total 2n operations.
      */
     static class SlidingWindowMaximum {
+
+        class Pair<K,V> {
+            K key;
+            V value;
+
+            Pair(K key, V value) {
+                this.key = key;
+                this.value = value;
+            }
+
+            public K getKey() {
+                return key;
+            }
+
+            public V getValue() {
+                return value;
+            }
+        }
+
         public int[] maxSlidingWindow(int[] nums, int k) {
 
             if (k == 0 || k > nums.length) {
@@ -306,6 +323,64 @@ public class LeetCodeProblems {
 
 
     /**
+     * https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/
+     * Say you have an array for which the ith element is the price of a given stock on day i.
+     *
+     * Design an algorithm to find the maximum profit. You may complete at most k transactions.
+     *
+     * Note:
+     * You may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).
+     *
+     * Example 1:
+     *
+     * Input: [2,4,1], k = 2
+     * Output: 2
+     * Explanation: Buy on day 1 (price = 2) and sell on day 2 (price = 4), profit = 4-2 = 2.
+     * Example 2:
+     *
+     * Input: [3,2,6,5,0,3], k = 2
+     * Output: 7
+     * Explanation: Buy on day 2 (price = 2) and sell on day 3 (price = 6), profit = 6-2 = 4.
+     *              Then buy on day 5 (price = 0) and sell on day 6 (price = 3), profit = 3-0 = 3.
+     */
+    static class BestTimeToBuyAndSellIV {
+        public int maxProfit(int k, int[] prices) {
+
+            if (k == 0 || prices.length < 2) {
+                return 0;
+            }
+
+            if (k > prices.length/2) {
+                return maxTransactionProfit(prices);
+            }
+
+            int transactions = k;
+            int dp[][] = new int[transactions+1][prices.length];
+
+            for (int t=1; t < dp.length; t++) {
+                for (int d = 1; d < dp[0].length; d++) {
+                    int max = Integer.MIN_VALUE;
+                    for (int i=0; i<d; i++) {
+                        dp[t][d] = Math.max(dp[t][d], Math.max(dp[t][d-1], dp[t-1][i] + prices[d] - prices[i]));
+                    }
+                }
+            }
+            return dp[transactions][dp[0].length-1];
+        }
+
+        private int maxTransactionProfit(int[] prices) {
+            int maxProfit = 0;
+            for (int i=1; i<prices.length; i++) {
+                if (prices[i] > prices[i-1]) {
+                    maxProfit += prices[i] - prices[i-1];
+                }
+            }
+            return maxProfit;
+        }
+    }
+
+
+    /**
      * https://leetcode.com/problems/dungeon-game/
      * The demons had captured the princess (P) and imprisoned her in the bottom-right corner of a dungeon. The dungeon consists of M x N rooms laid out in a 2D grid. Our valiant knight (K) was initially positioned in the top-left room and must fight his way through the dungeon to rescue the princess.
      * <p>
@@ -364,7 +439,8 @@ public class LeetCodeProblems {
 
     /**
      * https://leetcode.com/problems/shortest-palindrome/
-     * Given a string s, you are allowed to convert it to a palindrome by adding characters in front of it. Find and return the shortest palindrome you can find by performing this transformation.
+     * Given a string s, you are allowed to convert it to a palindrome by adding characters in front of it.
+     * Find and return the shortest palindrome you can find by performing this transformation.
      * <p>
      * Example 1:
      * <p>
@@ -2018,6 +2094,59 @@ public class LeetCodeProblems {
                 }
             }
             return cache[amount] == Integer.MAX_VALUE ? -1 : cache[amount];
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/array-nesting/
+     * A zero-indexed array A of length N contains all integers from 0 to N-1.
+     * Find and return the longest length of set S, where S[i] = {A[i], A[A[i]], A[A[A[i]]], ... }
+     * subjected to the rule below.
+     *
+     * Suppose the first element in S starts with the selection of element A[i] of index = i,
+     * the next element in S should be A[A[i]], and then A[A[A[i]]]… By that analogy, we stop adding right before
+     * a duplicate element occurs in S.
+     *
+     * Example 1:
+     *
+     * Input: A = [5,4,0,3,1,6,2]
+     * Output: 4
+     * Explanation:
+     * A[0] = 5, A[1] = 4, A[2] = 0, A[3] = 3, A[4] = 1, A[5] = 6, A[6] = 2.
+     *
+     * One of the longest S[K]:
+     * S[0] = {A[0], A[5], A[6], A[2]} = {5, 6, 2, 0}
+     *
+     *
+     * Note:
+     *
+     * N is an integer within the range [1, 20,000].
+     * The elements of A are all distinct.
+     * Each element of A is an integer within the range [0, N-1].
+     */
+    class ArrayNesting {
+        public int arrayNesting(int[] nums) {
+            int count;
+            int maxCount = 0;
+            for (int i=0; i<nums.length; i++) {
+                // count =1, when the element is at right position. a[i] = i.
+                count = 1;
+                // Swap until you find a cycle.
+                while (nums[i] != i) {
+                    swap(nums, i, nums[i]);
+                    count++;
+                }
+                maxCount = Math.max(maxCount, count);
+            }
+            return maxCount;
+        }
+
+        // We can make it faster by using bit operators for swapping and avoiding function call.
+        private void swap(int[] arr, int x, int y) {
+            int temp = arr[x];
+            arr[x] = arr[y];
+            arr[y] = temp;
         }
     }
 }

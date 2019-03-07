@@ -4,6 +4,8 @@ import edu.code.samples.ds.Graph;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
@@ -955,7 +957,7 @@ public class InterviewBit {
         class UndirectedGraphNode {
             int label;
             List<UndirectedGraphNode> neighbors;
-            UndirectedGraphNode(int x) { label = x; neighbors = new ArrayList<UndirectedGraphNode>(); }
+            UndirectedGraphNode(int x) { label = x; neighbors = new ArrayList<>(); }
         }
 
         public UndirectedGraphNode cloneGraph(UndirectedGraphNode node) {
@@ -980,4 +982,148 @@ public class InterviewBit {
             return newNode;
         }
     }
+
+    /**
+     * https://www.interviewbit.com/problems/distinct-subsequences/
+     * Given two sequences S, T, count number of unique ways in sequence S, to form a subsequence that is identical to the sequence T.
+     *
+     *  Subsequence : A subsequence of a string is a new string which is formed from the original string by deleting
+     *  some (can be none ) of the characters without disturbing the relative positions of the remaining characters.
+     *  (ie, "ACE" is a subsequence of "ABCDE" while "AEC" is not).
+     *
+     * Example :
+     * S = "rabbbit"
+     * T = "rabbit"
+     * Return 3. And the formations as follows:
+     *
+     * S1= "ra_bbit"
+     * S2= "rab_bit"
+     * S3="rabb_it"
+     * "_" marks the removed character.
+     */
+    public static class DistinctSubsequence {
+        public int numDistinct(String A, String B) {
+            return ways(A, B);
+        }
+
+        private int ways(String str, String pattern) {
+            if (pattern.length() == 0) {
+                return 1;
+            }
+
+            if (str.length() < pattern.length()) {
+                return 0;
+            }
+
+            int countWays = 0;
+            if (str.charAt(0) != pattern.charAt(0)) {
+                countWays += ways(str.substring(1), pattern);
+            } else {
+                countWays += ways(str.substring(1), pattern.substring(1));
+                countWays += ways(str.substring(1), pattern);
+            }
+            return countWays;
+        }
+    }
+
+    /**
+     * https://www.interviewbit.com/problems/intersection-of-sorted-arrays/
+     * Find the intersection of two sorted arrays.
+     * OR in other words,
+     * Given 2 sorted arrays, find all the elements which occur in both the arrays.
+     *
+     * Example :
+     *
+     * Input :
+     *     A : [1 2 3 3 4 5 6]
+     *     B : [3 3 5]
+     *
+     * Output : [3 3 5]
+     *
+     * Input :
+     *     A : [1 2 3 3 4 5 6]
+     *     B : [3 5]
+     *
+     * Output : [3 5]
+     */
+    public class IntersectionOfSortedArrays {
+        // DO NOT MODIFY THE LIST. IT IS READ ONLY
+        public ArrayList<Integer> intersect(final List<Integer> A, final List<Integer> B) {
+
+            ArrayList<Integer> result = new ArrayList<>();
+
+            int i=0, j=0;
+            int a, b;
+            while (i < A.size() && j < B.size()) {
+                a = A.get(i);
+                b = B.get(j);
+                if (a == b) {
+                    result.add(Integer.valueOf(a));
+                    i++; j++;
+                } else if (a < b) {
+                    i++;
+                } else {
+                    j++;
+                }
+            }
+            return result;
+        }
+    }
+
+    /**
+     * https://www.interviewbit.com/problems/3-sum-zero/
+     * Given an array S of n integers, are there elements a, b, c in S such that a + b + c = 0?
+     * Find all unique triplets in the array which gives the sum of zero.
+     *
+     * Note:
+     *
+     *  Elements in a triplet (a,b,c) must be in non-descending order. (ie, a ≤ b ≤ c)
+     * The solution set must not contain duplicate triplets. For example, given array S = {-1 0 1 2 -1 -4}, A solution set is:
+     * (-1, 0, 1)
+     * (-1, -1, 2)
+     */
+    public class ThreeSumZero {
+        public ArrayList<ArrayList<Integer>> threeSum(ArrayList<Integer> input) {
+            ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+            Collections.sort(input);
+
+            int a, b, c, i, j,k;
+            for (j=0; j < input.size() - 2; j++) {
+
+                if (j > 0 && input.get(j).intValue() == input.get(j-1).intValue()) {
+                    continue;
+                }
+
+                i = j+1;
+                k = input.size() - 1;
+                a = input.get(j);
+
+                while (i < k) {
+                    b = input.get(i);
+                    c = input.get(k);
+
+                    if (a+b+c == 0) {
+                        ArrayList<Integer> triplet = new ArrayList<>(Arrays.asList(a,b,c));
+                        result.add(triplet);
+                        i++; k--;
+
+                        while (i < k  && input.get(k) == c) {
+                            k--;
+                        }
+
+                        while (i < k && input.get(i) == b) {
+                            i++;
+                        }
+
+                    } else if (a+b+c > 0) {
+                        k--;
+                    } else {
+                        i++;
+                    }
+                }
+            }
+            return result;
+        }
+    }
+
 }
