@@ -81,7 +81,7 @@ public interface Heap<T> {
         }
 
         private void heapify(int index) {
-            int lChildIndex = 2 * index +1 ;
+            int lChildIndex = 2 * index + 1;
             int rChildIndex = 2 * index + 2;
             int smallerIndex = index;
 

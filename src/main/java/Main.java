@@ -36,7 +36,7 @@ public class Main {
 //        directedGraphDemo();
 //        weightedGraphDemo();
 //        unionFindDemo();
-//        dpDemo();
+        dpDemo();
 //        kmpDemo();
 //        bitsDemo();
 //        segmentTreeDemo();
@@ -200,8 +200,12 @@ public class Main {
         System.out.print("\nEdge weight of node between 1 and 2 : " + graph.edgeWeight(1,2));
 
         System.out.print("\nBFS element " + 1 + " in graph : " + graph.bfs(1, 1));
+        System.out.print("\nBFS element " + 1 + " in graph : " + graph.bfs(1));
+        System.out.print("\nBFS element " + 1000 + " in graph : " + graph.bfs(1000));
 
-        System.out.print("\nDFS element " + 1 + " in graph : " + graph.bfs(1, 5));
+        System.out.print("\nDFS element " + 1 + " in graph : " + graph.dfs(1, 5));
+        System.out.print("\nDFS element " + 1 + " in graph : " + graph.dfs(1));
+        System.out.print("\nDFS element " + 1000 + " in graph : " + graph.dfs(1000));
 
         System.out.println("\n[Weighted] Minimum spanning tree, prims");
         graph.mstPrims();
@@ -314,7 +318,9 @@ public class Main {
 
         String s = "abcda";
         System.out.println("\n\nMinimum insertion for converting " + s + " to palindrome is : " + Sequences.minimumInsertionForPalindrom(s));
-        System.out.println("\n\nMinimum insertion for converting " + s + " to palindrome is : " + Sequences.tabulatedLongestPalindromicSubsequence(s));
+        System.out.println("\n\nMinimum insertion for converting " + s + " to palindrome is : " + Sequences.minimumInsertionForPalindromTabulated(s));
+
+        System.out.println("\n\nLength of longest palindromic subscequence in  " + s + " is : " + Sequences.tabulatedLongestPalindromicSubsequence(s));
 
         System.out.println("\n\nLength of maximum chain is : " + UnclassifiedDP.maxChainLength());
 

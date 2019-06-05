@@ -40,7 +40,11 @@ public interface Graph<V> {
 
     boolean bfs(V startingVertex, V element);
 
+    boolean bfs(V element);
+
     boolean dfs(V startingVertex, V element);
+
+    boolean dfs(V element);
 
     Map<V, Double> singleSourceShortestPathDijkstra(V source);
 
@@ -57,7 +61,7 @@ public interface Graph<V> {
 
     class AdjacencyListGraph<V> implements Graph<V> {
 
-        protected class Edge {
+        class Edge {
             private final double weight;
             private final V to;
 
@@ -199,6 +203,38 @@ public interface Graph<V> {
         }
 
         @Override
+        public boolean bfs(V element) {
+            Set<V> unexplored = new HashSet<>(this.vertices());
+            while (!unexplored.isEmpty()) {
+                V start = unexplored.stream().findFirst().get();
+                if (_bfsUnexplored(start, element, unexplored)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean _bfsUnexplored(V start, V element, Set<V> unexplored) {
+            Queue<V> queue = new LinkedBlockingQueue<>();
+            queue.add(start);
+
+            while (!queue.isEmpty()) {
+                V vertex = queue.remove();
+                unexplored.remove(vertex);
+
+                if (vertex.equals(element)) {
+                    return true;
+                }
+
+                queue.addAll(this.successors(vertex)
+                            .stream()
+                            .filter(v -> unexplored.contains(v))
+                            .collect(Collectors.toList()));
+            }
+            return false;
+        }
+
+        @Override
         public boolean dfs(V startingVertex, V element) {
             Set<V> explored = new HashSet<>();
             while(startingVertex != null) {
@@ -221,6 +257,34 @@ public interface Graph<V> {
             explored.add(startingVertex);
             for (V vertex: this.successors(startingVertex)) {
                 if (!explored.contains(vertex) && _dfs(vertex, element, explored)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public boolean dfs(V element) {
+            Set<V> unexplored = new HashSet<>(this.vertices());
+            while (!unexplored.isEmpty()) {
+                V start = unexplored.stream().findFirst().get();
+                if (_dfsUnexplored(start, element, unexplored)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean _dfsUnexplored(V start, V element, Set<V> unexplored) {
+            if (!unexplored.contains(start)) {
+                return false;
+            }
+            unexplored.remove(start);
+            if (start.equals(element)) {
+                return true;
+            }
+
+            for (V vertex: this.successors(start)) {
+                if (unexplored.contains(vertex) && _dfsUnexplored(vertex, element, unexplored)) {
                     return true;
                 }
             }

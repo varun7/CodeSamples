@@ -41,6 +41,20 @@ public class Sequences {
         return memoizedPalindrome(s, 0, s.length()-1, dp);
     }
 
+    public static int minimumInsertionForPalindromTabulated(String s) {
+        int [][] dp = new int[s.length()][s.length()];
+        for (int len=2; len <= s.length(); len++) {
+            for (int i=0, j=i+len-1; j < s.length(); i++, j++) {
+                if (s.charAt(i) == s.charAt(j)) {
+                    dp[i][j] = dp[i+1][j-1];
+                } else {
+                    dp[i][j] = Math.min(dp[i+1][j], dp[i][j-1]) + 1;
+                }
+            }
+        }
+        return dp[0][s.length()-1];
+    }
+
     private static int memoizedPalindrome(String s, int i, int j, int [][]dp) {
         if (i >= j) {
             return 0;
@@ -62,13 +76,12 @@ public class Sequences {
         }
 
         int max = 0;
-        for (int len=2; len < dp.length; len++) {
-            for (int i=0; i < dp.length - len; i++) {
-                int j = i + len - 1;
+        for (int len=2; len <= s.length(); len++) {
+            for (int i=0, j=i+len-1; j < s.length(); i++, j++) {
                 if (s.charAt(i) == s.charAt(j)) {
                     dp[i][j] = dp[i+1][j-1] + 2;
                 } else {
-                    dp[i][j] = Math.max(dp[i+1][j], dp[i][j-1]) + 1;
+                    dp[i][j] = Math.max(dp[i+1][j], dp[i][j-1]);
                 }
                 max = Math.max(max, dp[i][j]);
             }

@@ -9,6 +9,7 @@ public interface UnionFind<V> {
      * Returns the name of the group input node is part of.
      */
     Leader<V> find(V node);
+
     /**
      * Fuse groups which x and y are part of.
      */
