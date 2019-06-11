@@ -11,6 +11,8 @@ import edu.code.samples.ds.IntervalSearchTree;
 import edu.code.samples.ds.SegmentTree;
 import edu.code.samples.ds.Tree;
 import edu.code.samples.ds.UnionFind;
+import edu.code.samples.generic.Algorithms;
+import edu.code.samples.generic.Greedy;
 import edu.code.samples.generic.InversionPair;
 import edu.code.samples.generic.KMP;
 import edu.code.samples.sort.Sort;
@@ -28,7 +30,7 @@ public class Main {
 //        quickSortDemo();
 //        mergeSortDemo();
 //        kthSelectionDemo();
-//        heapDemo();
+        heapDemo();
 //        heapSortDemo();
 //        bstDemo();
 //        binarySearchDemo();
@@ -36,8 +38,9 @@ public class Main {
 //        directedGraphDemo();
 //        weightedGraphDemo();
 //        unionFindDemo();
-        dpDemo();
-//        kmpDemo();
+//        dpDemo();
+//        algorithmDemo();
+//        greedyDemo();
 //        bitsDemo();
 //        segmentTreeDemo();
 //        binaryIndexedTreeDemo();
@@ -348,9 +351,30 @@ public class Main {
         System.out.println("\n\n");
     }
 
-    private static void kmpDemo() {
+    private static void algorithmDemo() {
+        int[] array = {-2, -3, 4, -1, -2, 1, 5, -3};
+        System.out.println("\n\nMaximum subarray sum = " + Algorithms.maxSubarraySum(array));
+
+        int[] negativeArray = {-2, -3, -4, -1, -2, -10, -6, -3};
+        System.out.println("\n\nMaximum subarray sum for all negative array = " + Algorithms.maxSubarraySum(negativeArray));
+
+        int[] majorityElementArray = {-1, -2, -2, -1, -2, -10, -2};
+        System.out.println("\n\nMajority element in the array = " + Algorithms.majorityElement(majorityElementArray));
+        int[] noMajorityElementArray = {-1, -2, -2, -1, -2, -10, -2, -10, -7};
+        System.out.println("\n\nMajority element in the array (" + Integer.MIN_VALUE + " if none present) = " + Algorithms.majorityElement(noMajorityElementArray));
+
         String text = "varun sharma", pattern = "arn";
         System.out.println("\n\n" + text + " contains " + pattern + " = " + KMP.contains(text, pattern));
+    }
+
+    private static void greedyDemo() {
+        int[] arrival = {900, 915, 1030, 1045};
+        int[] departure = {930, 1300, 1100, 1145};
+        System.out.println("\n\nMinimum platforms required = " + Greedy.minimumNumberOfPlatforms(arrival, departure));
+
+        int[] start = {1,3,0,5,8,5};
+        int[] finish = {2,4,6,7,9,9};
+        System.out.println("\n\nMaximum activities = " + Greedy.maximumNumberOfActivities(start, finish));
     }
 
     private static void bitsDemo() {

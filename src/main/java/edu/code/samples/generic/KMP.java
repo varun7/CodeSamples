@@ -34,7 +34,7 @@ public class KMP {
                 if (len == 0) {
                     kmp[i++] = 0;
                 } else {
-                    len--;
+                    len = kmp[len-1];
                 }
             }
         }
