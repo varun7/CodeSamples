@@ -1,71 +1,112 @@
 package edu.code.samples.ds;
 
-public class SkipList {
 
-    class SkipListNode {
-        SkipListNode[] next;
-        int levels;
-        int data;
+import java.util.List;
 
-        public SkipListNode(int data, int levels) {
-            this.levels = levels;
-            this.data = data;
-            this.next = new SkipListNode[levels];
+public interface SkipList<E extends Comparable<? super E>> {
+
+    boolean contains(E item);
+
+    void add(E item);
+
+    void delete(E item);
+
+    void printSkipList();
+
+    class RandomizedSkipList<E extends Comparable<? super E>> implements SkipList<E> {
+
+        private class SkipNode<E extends Comparable<? super E>> {
+            E value;
+            SkipNode<E>[] next;
+
+            public SkipNode(E value, int size) {
+                this.value = value;
+                next = new SkipNode[size+1];
+            }
         }
 
-        public SkipListNode(int data) {
-            this.data = data;
-            this.levels = getRandomLevel();
-            this.next = new SkipListNode[levels];
+        private SkipNode<E> head;
+        private SkipNode<E> sentinel;
+        private int maxLevel;
+
+        public RandomizedSkipList(int size) {
+            this.maxLevel = (int) (Math.log(size)/Math.log(2));
+            this.head = new SkipNode<>(null, maxLevel + 1);
+            this.sentinel = new SkipNode<>(null, maxLevel + 1);
+
+            for (int i=0; i <= maxLevel; i++) {
+                head.next[i] = sentinel;
+                sentinel.next[i] = null;
+            }
+        }
+
+        @Override
+        public boolean contains(E item) {
+            SkipNode<E> node = this.head;
+            for (int i=maxLevel; i>=0; i--) {
+                while (node.next[i] != sentinel && node.next[i].value.compareTo(item) <= 0) {
+                    if (node.next[i].value.compareTo(item) == 0) {
+                        return true;
+                    }
+                    node = node.next[i];
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void add(E item) {
+            int newNodeLevel = getRandomLevel();
+            SkipNode<E> node = this.head;
+            SkipNode<E> newNode = new SkipNode<>(item, newNodeLevel);
+            for (int i=maxLevel; i >= 0; i--) {
+                while (node.next[i] != sentinel && node.next[i].value.compareTo(item) < 0) {
+                    node = node.next[i];
+                }
+                if (i <= newNodeLevel) {
+                    SkipNode<E> temp = node.next[i];
+                    node.next[i] = newNode;
+                    newNode.next[i] = temp;
+                }
+            }
+        }
+
+        @Override
+        public void printSkipList() {
+            System.out.println("\n\nMaximum level in skipList = " + maxLevel);
+            for (int i=maxLevel-1; i >=0; i--) {
+                System.out.print("Level " + i + ": ");
+                for (SkipNode<E> node = this.head; node != sentinel; node = node.next[i]) {
+                    System.out.print( node.value + " , ");
+                }
+                System.out.println();
+            }
+        }
+
+        @Override
+        public void delete(E item) {
+            if (!contains(item)) {
+                System.out.println("Cannot delete as element is not present in the list.");
+            }
+
+            SkipNode<E> node = this.head;
+            for (int i=maxLevel; i>=0; i--) {
+                while (node.next[i] != sentinel && node.next[i].value.compareTo(item) <= 0) {
+                    if (node.next[i].value.compareTo(item) == 0) {
+                        node.next[i] = node.next[i].next[i];
+                    }
+                    node = node.next[i];
+                }
+            }
+            System.out.println("Deleted node " + item);
         }
 
         private int getRandomLevel() {
-            int l = 1;
-            while (l < MAX_LEVEL && Math.random() < 0.5) {
-                l++;
+            int level = 0;
+            while (level < maxLevel && Math.random() > 0.5) {
+                level++;
             }
-            return l;
+            return level;
         }
     }
-
-    private SkipListNode head;
-    private static final int MAX_LEVEL = 4;
-
-    public boolean contains(int item) {
-        SkipListNode current = head, next;
-        for (int i=MAX_LEVEL-1; i >=0; i--) {
-            next = current.next[i];
-            while(next.data < item) {
-                current = next;
-                next = next.next[i];
-            }
-        }
-        current = current.next[0];
-        if (current.data == item) {
-            return true;
-        }
-        return false;
-    }
-
-    public void add(int item) {
-        if (head == null) {
-            createAndAddFirstItem(item);
-            return;
-        }
-        // TODO: Implement this.
-    }
-
-    public void delete(int item) {
-        // TODO: Implement this.
-    }
-
-    private void createAndAddFirstItem(int item) {
-        // create head node.
-        head = new SkipListNode(item, MAX_LEVEL);
-        SkipListNode sentinel = new SkipListNode(Integer.MAX_VALUE, MAX_LEVEL);
-        for (int i=0; i < MAX_LEVEL; i++) {
-            head.next[i] = sentinel;
-        }
-    }
-
 }

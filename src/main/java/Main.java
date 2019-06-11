@@ -9,6 +9,7 @@ import edu.code.samples.ds.Graph;
 import edu.code.samples.ds.Heap;
 import edu.code.samples.ds.IntervalSearchTree;
 import edu.code.samples.ds.SegmentTree;
+import edu.code.samples.ds.SkipList;
 import edu.code.samples.ds.Tree;
 import edu.code.samples.ds.UnionFind;
 import edu.code.samples.generic.Algorithms;
@@ -30,7 +31,8 @@ public class Main {
 //        quickSortDemo();
 //        mergeSortDemo();
 //        kthSelectionDemo();
-        heapDemo();
+//        heapDemo();
+        skipListDemo();
 //        heapSortDemo();
 //        bstDemo();
 //        binarySearchDemo();
@@ -99,6 +101,22 @@ public class Main {
         heap.delete();
         heap.delete();
         System.out.println("Minimum element = " + heap.peek());
+    }
+
+    private static void skipListDemo() {
+        System.out.println("\n\n Skiplist Demo: ");
+        SkipList<Integer> skipList = new SkipList.RandomizedSkipList<>(10);
+        skipList.add(10);
+        skipList.add(100);
+        skipList.add(50);
+        skipList.add(20);
+        skipList.add(30);
+        skipList.printSkipList();
+        System.out.println("Skip list contains 50 = " + skipList.contains(50));
+        System.out.println("Skip list contains 70 = " + skipList.contains(70));
+        skipList.delete(50);
+        skipList.printSkipList();
+        System.out.println("Skip list contains 50 = " + skipList.contains(50));
     }
 
     private static void binarySearchDemo() {
