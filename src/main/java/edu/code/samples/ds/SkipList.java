@@ -1,8 +1,6 @@
 package edu.code.samples.ds;
 
 
-import java.util.List;
-
 public interface SkipList<E extends Comparable<? super E>> {
 
     boolean contains(E item);
