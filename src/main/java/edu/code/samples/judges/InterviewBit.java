@@ -87,6 +87,7 @@ public class InterviewBit {
     }
 
     /**
+     * https://www.interviewbit.com/problems/merge-overlapping-intervals/
      * Given a collection of intervals, merge all overlapping intervals.
      *
      * For example:
@@ -1027,6 +1028,39 @@ public class InterviewBit {
                 countWays += ways(str.substring(1), pattern);
             }
             return countWays;
+        }
+
+        private int waysDP(String str, String pattern) {
+            if (pattern.length() == 0) {
+                return 1;
+            }
+
+            if (str.length() < pattern.length()) {
+                return 0;
+            }
+
+            int dp[][] = new int[pattern.length()+1][str.length()+1];
+            Arrays.fill(dp[0], 1);
+
+            char pChar, sChar;
+            for (int p=1; p < dp.length; p++) {
+                for (int s = 1; s < dp[0].length; s++) {
+                    pChar = pattern.charAt(p-1);
+                    sChar = str.charAt(s-1);
+
+                    if (pChar != sChar) {
+                        // When characters in pattern and text don't match then only option is to delete
+                        // character in string. The value for dp[p][s] in this case will be of dp[p][s-1]
+                        // i.e. of time when character p was not considered.
+                        dp[p][s] = dp[p][s-1];
+                    } else {
+                        // When characters in pattern and text match then there are 2 cases. Either we can
+                        // delete the character in str (dp[p][s-1]) or we can consider it which is dp[p-1][s-1].
+                        dp[p][s] = dp[p-1][s-1] + dp[p][s-1];
+                    }
+                }
+            }
+            return dp[pattern.length()][str.length()];
         }
     }
 

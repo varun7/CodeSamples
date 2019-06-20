@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class LeetCodeProblems {
@@ -129,7 +130,7 @@ public class LeetCodeProblems {
     /**
      * https://leetcode.com/problems/trapping-rain-water/
      * Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it is able to trap after raining.
-     * The above elevation map is represented by array [0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water (blue section) are being trapped. Thanks Marcos for contributing this image!
+     * The above elevation map is represented by array [0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water (blue section) are being trapped.
      * <p>
      * Example:
      * <p>
@@ -263,6 +264,55 @@ public class LeetCodeProblems {
 
 
     /**
+     * https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/
+     * Say you have an array for which the ith element is the price of a given stock on day i.
+     *
+     * Design an algorithm to find the maximum profit. You may complete as many transactions as you like (i.e., buy one and sell one share of the stock multiple times).
+     *
+     * Note: You may not engage in multiple transactions at the same time (i.e., you must sell the stock before you buy again).
+     *
+     * Example 1:
+     *
+     * Input: [7,1,5,3,6,4]
+     * Output: 7
+     * Explanation: Buy on day 2 (price = 1) and sell on day 3 (price = 5), profit = 5-1 = 4.
+     *              Then buy on day 4 (price = 3) and sell on day 5 (price = 6), profit = 6-3 = 3.
+     * Example 2:
+     *
+     * Input: [1,2,3,4,5]
+     * Output: 4
+     * Explanation: Buy on day 1 (price = 1) and sell on day 5 (price = 5), profit = 5-1 = 4.
+     *              Note that you cannot buy on day 1, buy on day 2 and sell them later, as you are
+     *              engaging multiple transactions at the same time. You must sell before buying again.
+     * Example 3:
+     *
+     * Input: [7,6,4,3,1]
+     * Output: 0
+     * Explanation: In this case, no transaction is done, i.e. max profit = 0.
+     */
+    static class BestTimeToBuyAndSellII {
+        public int maxProfit(int[] prices) {
+            if (prices.length == 0 || prices.length ==1) {
+                return 0;
+            }
+            int profit = 0;
+            int i = 0, buyingPrice = prices[0];
+            while (i < prices.length-1) {
+                while (i < prices.length-1 && prices[i] >= prices[i+1]) {
+                    i++;
+                }
+                buyingPrice = prices[i];
+
+                while (i < prices.length-1 && prices[i] <= prices[i+1]) {
+                    i++;
+                }
+                profit += prices[i] - buyingPrice;
+            }
+            return profit;
+        }
+    }
+
+    /**
      * https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/
      * Say you have an array for which the ith element is the price of a given stock on day i.
      * <p>
@@ -319,6 +369,31 @@ public class LeetCodeProblems {
             }
             return maxProfit;
         }
+
+        public int maxProfitDP(int[] prices) {
+
+            if (prices.length < 2) {
+                return 0;
+            }
+
+            int transactions = 2;
+            int dp[][] = new int[transactions+1][prices.length];
+
+            for (int t=1; t < dp.length; t++) {
+                for (int d = 1; d < dp[0].length; d++) {
+
+                    // When transacting on day-d.
+                    int max = Integer.MIN_VALUE;
+                    for (int i=0; i<d; i++) {
+                        max = Math.max(max, dp[t-1][i] + prices[d] - prices[i]);
+                    }
+
+                    // dp[t][d-1] means not transacting on day d.
+                    dp[t][d] = Math.max(dp[t][d-1], max);
+                }
+            }
+            return dp[transactions][dp[0].length-1];
+        }
     }
 
 
@@ -359,7 +434,6 @@ public class LeetCodeProblems {
 
             for (int t=1; t < dp.length; t++) {
                 for (int d = 1; d < dp[0].length; d++) {
-                    int max = Integer.MIN_VALUE;
                     for (int i=0; i<d; i++) {
                         dp[t][d] = Math.max(dp[t][d], Math.max(dp[t][d-1], dp[t-1][i] + prices[d] - prices[i]));
                     }
@@ -382,27 +456,24 @@ public class LeetCodeProblems {
 
     /**
      * https://leetcode.com/problems/dungeon-game/
-     * The demons had captured the princess (P) and imprisoned her in the bottom-right corner of a dungeon. The dungeon consists of M x N rooms laid out in a 2D grid. Our valiant knight (K) was initially positioned in the top-left room and must fight his way through the dungeon to rescue the princess.
-     * <p>
-     * The knight has an initial health point represented by a positive integer. If at any point his health point drops to 0 or below, he dies immediately.
-     * <p>
-     * Some of the rooms are guarded by demons, so the knight loses health (negative integers) upon entering these rooms; other rooms are either empty (0's) or contain magic orbs that increase the knight's health (positive integers).
-     * <p>
+     * The demons had captured the princess (P) and imprisoned her in the bottom-right corner of a dungeon.
+     * The dungeon consists of M x N rooms laid out in a 2D grid. Our valiant knight (K) was initially positioned in the
+     * top-left room and must fight his way through the dungeon to rescue the princess.
+     *
+     * The knight has an initial health point represented by a positive integer. If at any point his health point drops
+     * to 0 or below, he dies immediately. Some of the rooms are guarded by demons, so the knight loses
+     * health (negative integers) upon entering these rooms; other rooms are either empty (0's) or contain magic orbs
+     * that increase the knight's health (positive integers).
+     *
      * In order to reach the princess as quickly as possible, the knight decides to move only rightward or downward in each step.
-     * <p>
-     * <p>
-     * <p>
+     *
      * Write a function to determine the knight's minimum initial health so that he is able to rescue the princess.
-     * <p>
      * For example, given the dungeon below, the initial health of the knight must be at least 7 if he follows the optimal path RIGHT-> RIGHT -> DOWN -> DOWN.
-     * <p>
-     * -2 (K)	-3	3
-     * -5	-10	1
-     * 10	30	-5 (P)
-     * <p>
-     * <p>
+     * -2 (K) -3	3
+     * -5	 -10	1
+     * 10	  30	-5 (P)
+     *
      * Note:
-     * <p>
      * The knight's health has no upper bound.
      * Any room can contain threats or power-ups, even the first room the knight enters and the bottom-right room where the princess is imprisoned.
      */
@@ -973,7 +1044,8 @@ public class LeetCodeProblems {
 
     /**
      * https://leetcode.com/problems/partition-equal-subset-sum/
-     * Given a non-empty array containing only positive integers, find if the array can be partitioned into two subsets such that the sum of elements in both subsets is equal.
+     * Given a non-empty array containing only positive integers, find if the array can be partitioned into
+     * two subsets such that the sum of elements in both subsets is equal.
      * <p>
      * Note:
      * Each of the array element will not exceed 100.
@@ -1023,6 +1095,18 @@ public class LeetCodeProblems {
             }
             return dp[set.length][target];
         }
+
+        private boolean isSubsetWithSpaceOptimized(int[] nums, int target) {
+            boolean dp[] = new boolean[target+1];
+
+            dp[0] = true;
+            for (int i=0; i < nums.length; i++) {
+                for (int t=target; t > 0; t--) {
+                    dp[t] = (dp[t] || (t >= nums[i] && dp[t-nums[i]]));
+                }
+            }
+            return dp[target];
+        }
     }
 
 
@@ -1037,70 +1121,156 @@ public class LeetCodeProblems {
      */
     static class PartiotionKEqualSums {
 
-        public boolean canPartitionKSubsets(int[] nums, int k) {
-            int sum = 0;
-            boolean[] visited = new boolean[nums.length];
-            for (int i = 0; i < nums.length; i++) {
-                sum += nums[i];
-                visited[i] = false;
+        class DFSSolution {
+            public boolean canPartitionKSubsets(int[] nums, int k) {
+                int sum = 0;
+                boolean[] visited = new boolean[nums.length];
+                for (int i = 0; i < nums.length; i++) {
+                    sum += nums[i];
+                    visited[i] = false;
+                }
+                if (sum % k != 0) {
+                    return false;
+                }
+                return isSubsetWithSum(nums, visited, sum / k, k, sum / k, 0);
             }
-            if (sum % k != 0) {
+
+            /**
+             * At first this seems like subset sum partitioning problem but backtracking approach failed
+             * as there can be multiple sets:
+             * Example:
+             * For {10,10,10,7,7,7,7,7,7,6,6,6}
+             * if the first set you take is 10, 10, 10 = 30 then there is no other solution but if you take
+             * 10 + 6 + 14 (7,7)
+             * 10 + 6 + 14 (7,7)
+             * 10 + 6 + 14 (7,7)
+             * Then this array can be partitioned into 3 subset of equal sum.
+             * <p>
+             * This solution performs simple dfs.
+             */
+            private boolean isSubsetWithSum(int[] set, boolean[] visited, int target, int k, int targetSum, int index) {
+                if (k == 1) {
+                    return true;
+                }
+
+                if (target < 0) {
+                    return false;
+                }
+
+                if (target == 0) {
+                    return isSubsetWithSum(set, visited, targetSum, k - 1, targetSum, 0);
+                }
+
+                for (int i = index; i < set.length; i++) {
+                    if (!visited[i]) {
+                        visited[i] = true;
+                        if (isSubsetWithSum(set, visited, target - set[i], k, targetSum, index + 1)) {
+                            return true;
+                        }
+                        visited[i] = false;
+                    }
+                }
                 return false;
             }
-            return isSubsetWithSum(nums, visited, sum / k, k, sum / k, 0);
+
         }
 
-        /**
-         * At first this seems like subset sum partitioning problem but backtracking approach failed
-         * as there can be multiple sets:
-         * Example:
-         * For {10,10,10,7,7,7,7,7,7,6,6,6}
-         * if the first set you take is 10, 10, 10 = 30 then there is no other solution but if you take
-         * 10 + 6 + 14 (7,7)
-         * 10 + 6 + 14 (7,7)
-         * 10 + 6 + 14 (7,7)
-         * Then this array can be partitioned into 3 subset of equal sum.
-         * <p>
-         * This solution performs simple dfs.
-         */
-        private boolean isSubsetWithSum(int[] set, boolean[] visited, int target, int k, int targetSum, int index) {
-            if (k == 1) {
+        class ExhaustiveChoiceSolution {
+
+            private int[] nums;
+            private int target;
+            private int groups;
+
+            public boolean canPartitionKSubsets(int[] nums, int k) {
+                this.nums = nums;
+                this.groups = k;
+
+                int sum = Arrays.stream(nums).sum();
+                if (sum % k != 0) {
+                    return false;
+                }
+                this.target = sum/k;
+                return isSubsetWithSum(new int[groups], 0);
+            }
+
+            private boolean isSubsetWithSum(int[] subsets, int index) {
+                if (index == nums.length) {
+                    return isSolved(subsets);
+                }
+
+                // As per free choice, a index in array can be part of any of the k subset
+                // Try all of them
+                for (int k=0; k<subsets.length; k++) {
+                    if (subsets[k] + nums[index] <= target) {
+
+                        // Make a choice to add index to subset-k
+                        subsets[k] += nums[index];
+                        if (isSubsetWithSum(subsets, index+1)) {
+                            return true;
+                        }
+
+                        // If this doesn't work out then undo this choice.
+                        subsets[k] -= nums[index];
+                    }
+
+                }
+                return false;
+            }
+
+            private boolean isSolved(int[] subsets) {
+                for (int i: subsets) {
+                    if (i != target) {
+                        return false;
+                    }
+                }
                 return true;
             }
 
-            if (target < 0) {
-                return false;
-            }
+        }
 
-            if (target == 0) {
-                return isSubsetWithSum(set, visited, targetSum, k - 1, targetSum, 0);
-            }
+        enum Result { TRUE, FALSE }
+        class ExhaustiveChoiceSolutionsOptimized {
 
-            for (int i = index; i < set.length; i++) {
-                if (!visited[i]) {
-                    visited[i] = true;
-                    if (isSubsetWithSum(set, visited, target - set[i], k, targetSum, index + 1)) {
-                        return true;
+            boolean search(int used, int todo, Result[] memo, int[] nums, int target) {
+                if (memo[used] == null) {
+                    memo[used] = Result.FALSE;
+                    int targ = (todo - 1) % target + 1;
+                    for (int i = 0; i < nums.length; i++) {
+                        if ((((used >> i) & 1) == 0) && nums[i] <= targ) {
+                            if (search(used | (1<<i), todo - nums[i], memo, nums, target)) {
+                                memo[used] = Result.TRUE;
+                                break;
+                            }
+                        }
                     }
-                    visited[i] = false;
                 }
+                return memo[used] == Result.TRUE;
             }
-            return false;
+
+            public boolean canPartitionKSubsets(int[] nums, int k) {
+                int sum = Arrays.stream(nums).sum();
+                if (sum % k > 0) return false;
+
+                Result[] memo = new Result[1 << nums.length];
+                memo[(1 << nums.length) - 1] = Result.TRUE;
+                return search(0, sum, memo, nums, sum / k);
+            }
         }
     }
 
 
     /**
      * https://leetcode.com/problems/russian-doll-envelopes/
-     * You have a number of envelopes with widths and heights given as a pair of integers (w, h). One envelope can fit into another if and only if both the width and height of one envelope is greater than the width and height of the other envelope.
-     * <p>
+     * You have a number of envelopes with widths and heights given as a pair of integers (w, h).
+     * One envelope can fit into another if and only if both the width and height of one envelope
+     * is greater than the width and height of the other envelope.
+     *
      * What is the maximum number of envelopes can you Russian doll? (put one inside other)
-     * <p>
+     *
      * Note:
      * Rotation is not allowed.
-     * <p>
+     *
      * Example:
-     * <p>
      * Input: [[5,4],[6,4],[6,7],[2,3]]
      * Output: 3
      * Explanation: The maximum number of envelopes you can Russian doll is 3 ([2,3] => [5,4] => [6,7]).
@@ -1136,7 +1306,9 @@ public class LeetCodeProblems {
 
     /**
      * https://leetcode.com/problems/burst-balloons/
-     * Given n balloons, indexed from 0 to n-1. Each balloon is painted with a number on it represented by array nums. You are asked to burst all the balloons. If the you burst balloon i you will get nums[left] * nums[i] * nums[right] coins. Here left and right are adjacent indices of i. After the burst, the left and right then becomes adjacent.
+     * Given n balloons, indexed from 0 to n-1. Each balloon is painted with a number on it represented by array nums.
+     * You are asked to burst all the balloons. If the you burst balloon i you will get nums[left] * nums[i] * nums[right] coins.
+     * Here left and right are adjacent indices of i. After the burst, the left and right then becomes adjacent.
      * <p>
      * Find the maximum coins you can collect by bursting the balloons wisely.
      * <p>
@@ -2147,6 +2319,109 @@ public class LeetCodeProblems {
             int temp = arr[x];
             arr[x] = arr[y];
             arr[y] = temp;
+        }
+    }
+
+
+    /**
+     *
+     * Given an unsorted integer array, find the smallest missing positive integer.
+     *
+     * Example 1:
+     *
+     * Input: [1,2,0]
+     * Output: 3
+     * Example 2:
+     *
+     * Input: [3,4,-1,1]
+     * Output: 2
+     * Example 3:
+     *
+     * Input: [7,8,9,11,12]
+     * Output: 1
+     * Note:
+     *
+     * Your algorithm should run in O(n) time and uses constant extra space.
+     */
+    class FirstMissingPositive {
+        public int firstMissingPositive(int[] nums) {
+            int sentinel = Integer.MIN_VALUE;
+            int maxN = nums.length;
+            int correctPos = 0;
+
+            int i=0;
+            while (i < nums.length) {
+                if (nums[i]-1 == i) {
+                    nums[i] = sentinel;
+                    i++;
+                } else if (nums[i] > maxN || nums[i] <= 0) {
+                    // Not in consideration range
+                    i++;
+                } else {
+                    correctPos = nums[i] -1;
+
+                    if (nums[correctPos] != sentinel) {
+                        nums[i] = nums[correctPos];
+                        nums[correctPos] = sentinel;
+                    } else {
+                        i++;
+                    }
+
+                }
+            }
+
+            for (int j=0; j<maxN; j++) {
+                if (nums[j] != sentinel) {
+                    return j+1;
+                }
+            }
+            return maxN+1;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/largest-rectangle-in-histogram/submissions/
+     * Given n non-negative integers representing the histogram's bar height where the width of each bar is 1, find the area of largest rectangle in the histogram.
+     *
+     * Above is a histogram where width of each bar is 1, given height = [2,1,5,6,2,3].
+     *
+     * The largest rectangle is shown in the shaded area, which has area = 10 unit.
+     *
+     *  Example:
+     * Input: [2,1,5,6,2,3]
+     * Output: 10
+     */
+    class LargestRectangleInHistogram {
+
+        class Pair<K,V> {
+            K index;
+            V height;
+            Pair(K index, V value) { this.index = index; this.height = value; }
+        }
+
+        public int largestRectangleArea(int[] heights) {
+            int maxArea = 0, width, height;
+            Stack<Pair<Integer, Integer>> stack = new Stack<>();
+
+            for (int i=0; i<heights.length; i++) {
+                while (!stack.isEmpty() && stack.peek().height >= heights[i]) {
+                    Pair<Integer, Integer> top = stack.pop();
+                    width = stack.isEmpty() ? i : i - stack.peek().index - 1;
+                    height = top.height;
+                    maxArea = Math.max(maxArea, height * width);
+                }
+                stack.push(new Pair<>(i, heights[i]));
+            }
+
+            while (!stack.isEmpty()) {
+                Pair<Integer, Integer> top = stack.pop();
+                height = top.height;
+                width = stack.isEmpty() ?  heights.length : heights.length - stack.peek().index - 1;
+                maxArea = Math.max(maxArea, height * width);
+            }
+
+            return maxArea;
         }
     }
 }
