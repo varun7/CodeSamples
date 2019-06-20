@@ -312,6 +312,7 @@ public class LeetCodeProblems {
         }
     }
 
+
     /**
      * https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/
      * Say you have an array for which the ith element is the price of a given stock on day i.
@@ -2192,7 +2193,7 @@ public class LeetCodeProblems {
      * Output: 0
      * Explanation: the amount of 3 cannot be made up just with coins of 2.
      */
-    class CoinChange2 {
+    static class CoinChange2 {
 
         public int change(int amount, int[] coins) {
             int[] dp = new int[amount + 1];
@@ -2223,7 +2224,7 @@ public class LeetCodeProblems {
      * Input: coins = [2], amount = 3
      * Output: -1
      */
-    class CoinChange {
+    static class CoinChange {
         public int coinChange(int[] coins, int amount) {
             return tabulated(coins, amount);
         }
@@ -2297,7 +2298,7 @@ public class LeetCodeProblems {
      * The elements of A are all distinct.
      * Each element of A is an integer within the range [0, N-1].
      */
-    class ArrayNesting {
+    static class ArrayNesting {
         public int arrayNesting(int[] nums) {
             int count;
             int maxCount = 0;
@@ -2343,7 +2344,7 @@ public class LeetCodeProblems {
      *
      * Your algorithm should run in O(n) time and uses constant extra space.
      */
-    class FirstMissingPositive {
+    static class FirstMissingPositive {
         public int firstMissingPositive(int[] nums) {
             int sentinel = Integer.MIN_VALUE;
             int maxN = nums.length;
@@ -2392,7 +2393,7 @@ public class LeetCodeProblems {
      * Input: [2,1,5,6,2,3]
      * Output: 10
      */
-    class LargestRectangleInHistogram {
+    static class LargestRectangleInHistogram {
 
         class Pair<K,V> {
             K index;
@@ -2422,6 +2423,42 @@ public class LeetCodeProblems {
             }
 
             return maxArea;
+        }
+    }
+
+    /**
+     * https://leetcode.com/problems/longest-valid-parentheses/
+     * Given a string containing just the characters '(' and ')', find the length of the longest valid (well-formed) parentheses substring.
+     *
+     * Example 1:
+     * Input: "(()"
+     * Output: 2
+     * Explanation: The longest valid parentheses substring is "()"
+     *
+     * Example 2:
+     * Input: ")()())"
+     * Output: 4
+     *
+     * Explanation: The longest valid parentheses substring is "()()"
+     */
+    static class LongestValidParenthesis {
+        public int longestValidParentheses(String s) {
+            int maxans = 0;
+            Stack<Integer> stack = new Stack<>();
+            stack.push(-1);
+            for (int i = 0; i < s.length(); i++) {
+                if (s.charAt(i) == '(') {
+                    stack.push(i);
+                } else {
+                    stack.pop();
+                    if (stack.empty()) {
+                        stack.push(i);
+                    } else {
+                        maxans = Math.max(maxans, i - stack.peek());
+                    }
+                }
+            }
+            return maxans;
         }
     }
 }
