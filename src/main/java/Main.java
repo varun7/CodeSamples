@@ -1,4 +1,5 @@
 import edu.code.samples.bits.BitsQuestions;
+import edu.code.samples.concurrent.ConcurrentProducerConsumer;
 import edu.code.samples.dp.Knapsack;
 import edu.code.samples.dp.MatrixPath;
 import edu.code.samples.dp.Sequences;
@@ -32,7 +33,7 @@ public class Main {
 //        mergeSortDemo();
 //        kthSelectionDemo();
 //        heapDemo();
-        skipListDemo();
+//        skipListDemo();
 //        heapSortDemo();
 //        bstDemo();
 //        binarySearchDemo();
@@ -49,6 +50,7 @@ public class Main {
 //        intervalSearchTreeDemo();
 //        demoInversionPair();
 //        test();
+        demoConcurrentProducerConsumer();
     }
 
     private static void mergeSortDemo() {
@@ -457,6 +459,22 @@ public class Main {
         InversionPair pairs = new InversionPair();
         int[] input = {50,20,10,10};
         System.out.println("Number of inversion pairs = " + pairs.countInversions(input));
+    }
+
+    private static void demoConcurrentProducerConsumer() {
+        ConcurrentProducerConsumer.UniDataBroker broker = new ConcurrentProducerConsumer.UniDataBroker();
+        new Thread(new ConcurrentProducerConsumer.ThreadProducer(broker)).start();
+        new Thread(new ConcurrentProducerConsumer.ThreadConsumer(broker)).start();
+
+        System.out.println("\n\n Queue based producer and consumer");
+        ConcurrentProducerConsumer.QueueBroker queueBroker = new ConcurrentProducerConsumer.QueueBroker(3);
+        new Thread(new ConcurrentProducerConsumer.ThreadProducer(queueBroker)).start();
+        new Thread(new ConcurrentProducerConsumer.ThreadConsumer(queueBroker)).start();
+
+        System.out.println("\n\n Lock based producer and consumer");
+        ConcurrentProducerConsumer.LockBasedBroker lockBasedBroker = new ConcurrentProducerConsumer.LockBasedBroker();
+        new Thread(new ConcurrentProducerConsumer.ThreadProducer(lockBasedBroker)).start();
+        new Thread(new ConcurrentProducerConsumer.ThreadConsumer(lockBasedBroker)).start();
     }
 
     class Pair {
