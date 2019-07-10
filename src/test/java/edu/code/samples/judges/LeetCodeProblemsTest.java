@@ -1,6 +1,5 @@
 package edu.code.samples.judges;
 
-import edu.code.samples.concurrent.ThreadBasedProducerConsumer;
 import org.junit.Test;
 
 public class LeetCodeProblemsTest {
@@ -20,12 +19,5 @@ public class LeetCodeProblemsTest {
         int[] capitals = {0, 1, 2};
         LeetCodeProblems.IPO.PriorityQueueSolution solution = new LeetCodeProblems.IPO.PriorityQueueSolution();
         solution.findMaximizedCapital(k, w, profits, capitals);
-    }
-
-    @Test
-    public void testThreadedProducerConsumer() {
-        ThreadBasedProducerConsumer.UniDataBroker broker = new ThreadBasedProducerConsumer.UniDataBroker();
-        new Thread(new ThreadBasedProducerConsumer.ThreadProducer(broker)).start();
-        new Thread(new ThreadBasedProducerConsumer.ThreadConsumer(broker)).start();
     }
 }

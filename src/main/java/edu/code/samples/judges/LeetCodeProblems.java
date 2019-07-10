@@ -1,18 +1,6 @@
 package edu.code.samples.judges;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class LeetCodeProblems {
@@ -2426,6 +2414,7 @@ public class LeetCodeProblems {
         }
     }
 
+
     /**
      * https://leetcode.com/problems/longest-valid-parentheses/
      * Given a string containing just the characters '(' and ')', find the length of the longest valid (well-formed) parentheses substring.
@@ -2459,6 +2448,467 @@ public class LeetCodeProblems {
                 }
             }
             return maxans;
+        }
+    }
+
+
+    /**
+     * Merge k sorted linked lists and return it as one sorted list. Analyze and describe its complexity.
+     *
+     * Example:
+     *
+     * Input:
+     * [
+     *   1->4->5,
+     *   1->3->4,
+     *   2->6
+     * ]
+     * Output: 1->1->2->3->4->4->5->6
+     */
+    static class MergeKSortedList {
+        class ListNode {
+            Integer val;
+            ListNode next;
+            ListNode(int x) { val = x; }
+        }
+
+        Comparator<ListNode> minComparator = (a,b) -> Integer.compare(a.val, b.val);
+
+        public ListNode mergeKLists(ListNode[] lists) {
+            PriorityQueue<ListNode> minHeap = createPriorityQueue(lists);
+            ListNode head = null;
+            ListNode tail = null;
+
+            while (!minHeap.isEmpty()) {
+                ListNode top = minHeap.poll();
+
+                if (tail == null) {
+                    head = top;
+                } else {
+                    tail.next = top;
+                }
+
+
+                if (top.next != null) {
+                    minHeap.add(top.next);
+                }
+                tail = top;
+                tail.next = null;
+            }
+            return head;
+        }
+
+        private PriorityQueue<ListNode> createPriorityQueue(ListNode[] lists) {
+            if (lists.length == 0) {
+                return new PriorityQueue<>();
+            }
+            List<ListNode> firstElement = new ArrayList<>(lists.length);
+            for(ListNode node: lists) {
+                if (node != null) {
+                    firstElement.add(node);
+                }
+            }
+            PriorityQueue<ListNode> minHeap = new PriorityQueue<>(lists.length, minComparator);
+            minHeap.addAll(firstElement);
+            return minHeap;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/generate-parentheses/
+     * Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
+     *
+     * For example, given n = 3, a solution set is:
+     *
+     * [
+     *   "((()))",
+     *   "(()())",
+     *   "(())()",
+     *   "()(())",
+     *   "()()()"
+     * ]
+     */
+    static class GenerateParenthesis {
+        public List<String> generateParenthesis(int n) {
+            List<String> result = new ArrayList<>();
+            if (n == 0) {
+                return result;
+            }
+            updateParen(result, "", n, n);
+            return result;
+        }
+
+        public void updateParen(List<String> result, String pattern, int open, int close) {
+            if (open < 0 || close <0) {
+                return;
+            }
+
+            if (open > close) {
+                return;
+            }
+
+            if (open == 0 && close == 0) {
+                result.add(pattern);
+                return;
+            }
+
+            updateParen(result, pattern + "(", open-1, close);
+            updateParen(result, pattern + ")", open, close-1);
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/substring-with-concatenation-of-all-words/
+     * You are given a string, s, and a list of words, words, that are all of the same length. Find all starting indices of substring(s) in s that is a concatenation of each word in words exactly once and without any intervening characters.
+     *
+     * Example 1:
+     *
+     * Input:
+     *   s = "barfoothefoobarman",
+     *   words = ["foo","bar"]
+     * Output: [0,9]
+     * Explanation: Substrings starting at index 0 and 9 are "barfoor" and "foobar" respectively.
+     * The output order does not matter, returning [9,0] is fine too.
+     * Example 2:
+     *
+     * Input:
+     *   s = "wordgoodgoodgoodbestword",
+     *   words = ["word","good","best","word"]
+     * Output: []
+     */
+    static class SubstringWithConcatenationOfAllWords {
+        public List<Integer> findSubstring(String s, String[] words) {
+            List<Integer> result = new ArrayList<>();
+            if (words.length == 0) {
+                return result;
+            }
+
+            Map<String, Integer> wordMap = createWordMap(words);
+            int wordLength = words[0].length();
+
+            for (int i=0; i<= s.length() - wordLength; i++) {
+                Map<String, Integer> occurrenceMap = new HashMap<>(wordMap);
+                if (containsAllWords(occurrenceMap, s, i, wordLength)) {
+                    result.add(i);
+                }
+            }
+            return result;
+        }
+
+        private boolean containsAllWords(Map<String, Integer> occurrenceMap, String s, int startIndex, int wordLength) {
+            while (startIndex + wordLength <= s.length() ) {
+                String word = s.substring(startIndex, startIndex + wordLength);
+                if (occurrenceMap.containsKey(word)) {
+                    int freq = occurrenceMap.get(word);
+                    if (freq > 1) {
+                        occurrenceMap.put(word, freq-1);
+                    } else {
+                        occurrenceMap.remove(word);
+                    }
+                } else {
+                    return false;
+                }
+
+                if (occurrenceMap.isEmpty()) {
+                    return true;
+                }
+
+                startIndex += wordLength;
+            }
+            return false;
+        }
+
+        private Map<String, Integer> createWordMap(String[] words) {
+            Map<String, Integer> wordMap = new HashMap<>();
+            for (String word: words) {
+                int freq = 1;
+                if (wordMap.containsKey(word)) {
+                    freq = wordMap.get(word) + 1;
+                }
+                wordMap.put(word, freq);
+            }
+            return wordMap;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/reverse-nodes-in-k-group/
+     * Given a linked list, reverse the nodes of a linked list k at a time and return its modified list.
+     *
+     * k is a positive integer and is less than or equal to the length of the linked list. If the number of nodes is not a multiple of k then left-out nodes in the end should remain as it is.
+     *
+     * Example:
+     *
+     * Given this linked list: 1->2->3->4->5
+     *
+     * For k = 2, you should return: 2->1->4->3->5
+     *
+     * For k = 3, you should return: 3->2->1->4->5
+     *
+     * Note:
+     *
+     * Only constant extra memory is allowed.
+     * You may not alter the values in the list's nodes, only nodes itself may be changed.
+     */
+    static class ReverseKGroups {
+
+        public static class ListNode {
+            int val;
+            ListNode next;
+            ListNode(int x) { val = x; }
+        }
+
+        ListNode newHead = null;
+        ListNode prevTail = null;
+        ListNode currStart = null;
+        ListNode currTail = null;
+        ListNode start;
+        ListNode newStart;
+
+        public ListNode reverseKGroup(ListNode head, int k) {
+
+//            if (head == null) {
+//                return head;
+//            }
+
+            start = head;
+            while (start != null) {
+                if (!hasKNodes(start, k)) {
+                    if (prevTail != null) {
+                        prevTail.next = start;
+                    }
+                    break;
+                }
+
+                currTail = reverse(start, k-1);
+
+                if (prevTail != null) {
+                    prevTail.next = currStart;
+                }
+
+                prevTail = currTail;
+                start = newStart;
+                currTail.next = null;
+            }
+
+            return newHead == null ? head : newHead;
+        }
+
+        private boolean hasKNodes(ListNode node, int k) {
+            int count = 0;
+            for (; node != null && count < k; node = node.next) {
+                count++;
+            }
+            return count == k;
+        }
+
+        private ListNode reverse(ListNode root, int k) {
+            if (k == 0 || root.next == null) {
+                if (newHead == null) {
+                    newHead = root;
+                }
+                currStart = root;
+                newStart = root.next;
+                return root;
+            }
+
+            ListNode previous = reverse(root.next, k-1);
+            previous.next = root;
+            return root;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/maximal-rectangle/
+     * Given a 2D binary matrix filled with 0's and 1's, find the largest rectangle containing only 1's and return its area.
+     *
+     * Example:
+     *
+     * Input:
+     * [
+     *   ["1","0","1","0","0"],
+     *   ["1","0","1","1","1"],
+     *   ["1","1","1","1","1"],
+     *   ["1","0","0","1","0"]
+     * ]
+     * Output: 6
+     */
+    static class MaximalRectangle {
+
+        public int maximalRectangle(char[][] matrix) {
+            if (matrix.length == 0) {
+                return 0;
+            }
+
+            int[] dp = new int[matrix[0].length];
+            int maxArea = 0;
+
+            for (int i=0; i < matrix.length; i++) {
+                for (int j=0; j<matrix[0].length; j++) {
+                    if (matrix[i][j] == '0') {
+                        dp[j] = 0;
+                    } else {
+                        dp[j] += 1;
+                    }
+                }
+                maxArea = Math.max(maxArea, largestRectangleArea(dp));
+            }
+            return maxArea;
+        }
+
+        class Pair<K,V> {
+            K index;
+            V height;
+            Pair(K index, V value) { this.index = index; this.height = value; }
+        }
+
+        public int largestRectangleArea(int[] heights) {
+            int maxArea = 0, width, height;
+            Stack<Pair<Integer, Integer>> stack = new Stack<>();
+
+            for (int i=0; i<heights.length; i++) {
+                while (!stack.isEmpty() && stack.peek().height >= heights[i]) {
+                    Pair<Integer, Integer> top = stack.pop();
+                    width = stack.isEmpty() ? i : i - stack.peek().index - 1;
+                    height = top.height;
+                    maxArea = Math.max(maxArea, height * width);
+                }
+                stack.push(new Pair<>(i, heights[i]));
+            }
+
+            while (!stack.isEmpty()) {
+                Pair<Integer, Integer> top = stack.pop();
+                height = top.height;
+                width = stack.isEmpty() ?  heights.length : heights.length - stack.peek().index - 1;
+                maxArea = Math.max(maxArea, height * width);
+            }
+
+            return maxArea;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/recover-binary-search-tree/
+     * Two elements of a binary search tree (BST) are swapped by mistake.
+     *
+     * Recover the tree without changing its structure.
+     *
+     * Example 1:
+     *
+     * Input: [1,3,null,null,2]
+     *
+     *    1
+     *   /
+     *  3
+     *   \
+     *    2
+     *
+     * Output: [3,1,null,null,2]
+     *
+     *    3
+     *   /
+     *  1
+     *   \
+     *    2
+     * Example 2:
+     *
+     * Input: [3,1,4,null,null,2]
+     *
+     *   3
+     *  / \
+     * 1   4
+     *    /
+     *   2
+     *
+     * Output: [2,1,4,null,null,3]
+     *
+     *   2
+     *  / \
+     * 1   4
+     *    /
+     *   3
+     * Follow up:
+     *
+     * A solution using O(n) space is pretty straight forward.
+     * Could you devise a constant space solution?
+     */
+    static class RecoverBST {
+
+        public static class TreeNode {
+            int val;
+            TreeNode left;
+            TreeNode right;
+            TreeNode(int x) { val = x; }
+        }
+
+        public void recoverTree(TreeNode root) {
+//            recoverTreeNoSpace(root);
+            recoverTreeNoSpace(root);
+        }
+
+        public void recoverTreeSpace(TreeNode root) {
+            List<TreeNode> sortedList = new ArrayList<>();
+            inorder(root, sortedList);
+            TreeNode first = null, second = null;
+
+            for (int i=0; i<sortedList.size(); i++) {
+                int previous = i == 0 ? Integer.MIN_VALUE : sortedList.get(i-1).val;
+                int next = i == sortedList.size() -1 ? Integer.MAX_VALUE : sortedList.get(i+1).val;
+                int current = sortedList.get(i).val;
+
+                if (current < previous || current > next) {
+                    if (first == null) {
+                        first = sortedList.get(i);
+                    } else {
+                        second = sortedList.get(i);
+                    }
+                }
+
+            }
+            int temp = first.val;
+            first.val = second.val;
+            second.val = temp;
+        }
+
+        private void inorder(TreeNode root, List<TreeNode> sortedList) {
+            if (root == null) {
+                return;
+            }
+            inorder(root.left, sortedList);
+            sortedList.add(root);
+            inorder(root.right, sortedList);
+        }
+
+        public void recoverTreeNoSpace(TreeNode root) {
+            inorderTraversal(root);
+            int temp = first.val;
+            first.val = second.val;
+            second.val = temp;
+        }
+
+
+        TreeNode previous = null, first = null, second = null;
+        private void inorderTraversal(TreeNode root) {
+            if (root == null) {
+                return;
+            }
+
+            inorderTraversal(root.left);
+
+            if (previous != null && first == null && previous.val > root.val) {
+                first = previous;
+            }
+            if (previous != null && first != null && previous.val > root.val) {
+                second = root;
+            }
+            previous = root;
+
+            inorderTraversal(root.right);
         }
     }
 }
