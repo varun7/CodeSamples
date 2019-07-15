@@ -17,6 +17,7 @@ import edu.code.samples.generic.Algorithms;
 import edu.code.samples.generic.Greedy;
 import edu.code.samples.generic.InversionPair;
 import edu.code.samples.generic.KMP;
+import edu.code.samples.kafka.WordCount;
 import edu.code.samples.sort.Sort;
 
 import java.util.Arrays;
@@ -50,7 +51,8 @@ public class Main {
 //        intervalSearchTreeDemo();
 //        demoInversionPair();
 //        test();
-        demoConcurrentProducerConsumer();
+//        demoConcurrentProducerConsumer();
+        kafkaDemo();
     }
 
     private static void mergeSortDemo() {
@@ -447,6 +449,10 @@ public class Main {
 
         System.out.println("\n\nPrinting intervals overlapping with (" + p + " , " + q + ") is/are: ");
         printIntervals(nodes);
+    }
+
+    private static void kafkaDemo() {
+        WordCount.countWordsFromStream();
     }
 
     private static void printIntervals(List<IntervalSearchTree.IntervalNode> nodes) {

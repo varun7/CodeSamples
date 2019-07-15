@@ -2911,4 +2911,161 @@ public class LeetCodeProblems {
             inorderTraversal(root.right);
         }
     }
+
+
+    /**
+     * https://leetcode.com/problems/insert-interval/
+     * Given a set of non-overlapping intervals, insert a new interval into the intervals (merge if necessary).
+     *
+     * You may assume that the intervals were initially sorted according to their start times.
+     *
+     * Example 1:
+     *
+     * Input: intervals = [[1,3],[6,9]], newInterval = [2,5]
+     * Output: [[1,5],[6,9]]
+     * Example 2:
+     *
+     * Input: intervals = [[1,2],[3,5],[6,7],[8,10],[12,16]], newInterval = [4,8]
+     * Output: [[1,2],[3,10],[12,16]]
+     * Explanation: Because the new interval [4,8] overlaps with [3,5],[6,7],[8,10].
+     */
+    static class InsertInterval {
+        final int START = 0;
+        final int END = 1;
+        // Comparator<int[]> comparator = (a, b) ->  a[START] - b[START] != 0 ? a[START] - b[START] : a[END] - b[END] ;
+
+        public int[][] insert(int[][] intervals, int[] newInterval) {
+            List<int[]> result = new ArrayList<>(intervals.length + 1);
+
+            int i=0;
+            // Add all smaller and non-overlapping intervals.
+            while (i < intervals.length && !doOverlap(intervals[i], newInterval) && intervals[i][START] < newInterval[START]) {
+                result.add(intervals[i++]);
+            }
+
+            // Merge all overlapping intervals and then add the merged interval.
+            while (i < intervals.length && doOverlap(intervals[i], newInterval)) {
+                newInterval = merge(intervals[i++], newInterval);
+            }
+            result.add(newInterval);
+
+            // Add intervals with start greater than end of new interval if any.
+            while (i < intervals.length) {
+                result.add(intervals[i++]);
+            }
+
+            return convertToMatrix(result);
+        }
+
+        private boolean doOverlap(int[] a, int[] b) {
+            if (b[END] < a[START] || b[START] > a[END]) {
+                return false;
+            }
+            return true;
+        }
+
+        private int[] merge(int[] a, int[] b) {
+            int[] result = new int[2];
+            result[START] = Math.min(a[START], b[START]);
+            result[END] = Math.max(a[END], b[END]);
+            return result;
+        }
+
+        private int[][] convertToMatrix(List<int[]> result) {
+            int[][] matrix = new int[result.size()][2];
+            int i=0;
+            for (int[] r: result) {
+                matrix[i++] = r;
+            }
+            return matrix;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/interleaving-string/
+     * Given s1, s2, s3, find whether s3 is formed by the interleaving of s1 and s2.
+     *
+     * Example 1:
+     *
+     * Input: s1 = "aabcc", s2 = "dbbca", s3 = "aadbbcbcac"
+     * Output: true
+     * Example 2:
+     *
+     * Input: s1 = "aabcc", s2 = "dbbca", s3 = "aadbbbaccc"
+     * Output: false
+     */
+    static class InterleavingStrings {
+        private String a;
+        private String b;
+        private String c;
+        private int[][] cache;
+
+        public boolean isInterleave(String s1, String s2, String s3) {
+            a = s1; b = s2; c = s3;
+            if (c.length() != a.length() + b.length()) {
+                return false;
+            }
+            cache = new int[a.length()][b.length()];
+            return isInterleaveMemoized(0,0,0);
+        }
+
+        private boolean isInterleaveRecursive(int i, int j, int k) {
+            if (k == c.length()) {
+                return true;
+            }
+
+            char chC = c.charAt(k);
+            if (i < a.length() && chC == a.charAt(i) && isInterleaveRecursive(i+1, j, k+1)) {
+                return true;
+            }
+
+            if (j < b.length() && chC == b.charAt(j) && isInterleaveRecursive(i, j+1, k+1)) {
+                return true;
+            }
+            return false;
+        }
+
+        private boolean isInterleaveMemoized(int i, int j, int k) {
+
+            if (i < a.length() && j < b.length() && cache[i][j] != 0) {
+                return cache[i][j] == -1 ? false : true;
+            }
+
+            if (k == c.length()) {
+                return true;
+            }
+
+            char chC = c.charAt(k);
+            boolean ans = false;
+            if (i < a.length() && chC == a.charAt(i) && isInterleaveRecursive(i+1, j, k+1)
+            || (j < b.length() && chC == b.charAt(j) && isInterleaveRecursive(i, j+1, k+1))) {
+                ans = true;
+            }
+
+            if (i < a.length() && j < b.length()) {
+                cache[i][j] = ans ? 1 : -1;
+            }
+            return ans;
+        }
+
+        private boolean isInterleaveTabulated() {
+            boolean [][] dp = new boolean[a.length()+1][b.length()+1];
+
+            for (int i=0; i<dp.length; i++) {
+                for (int j=0; j<dp[0].length; j++) {
+                    if (i==0 && j ==0) {
+                        dp[i][j] = true;
+                    } else if (i==0) {
+                        dp[i][j] = dp[i][j-1] && b.charAt(j-1) == c.charAt(i+j- 1);
+                    } else if (j==0) {
+                        dp[i][j] = dp[i-1][j] && a.charAt(i-1) == c.charAt(i+j-1);
+                    } else {
+                        dp[i][j] = dp[i-1][j] && a.charAt(i-1) == c.charAt(i+j-1) || dp[i][j-1] && b.charAt(j-1) == c.charAt(i+j-1);
+                    }
+                }
+            }
+            return dp[a.length()][b.length()];
+        }
+    }
 }

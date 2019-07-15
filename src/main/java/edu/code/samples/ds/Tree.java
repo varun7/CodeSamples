@@ -1,5 +1,7 @@
 package edu.code.samples.ds;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public interface Tree {
@@ -334,6 +336,30 @@ public interface Tree {
                 return true;
             }
             return false;
+        }
+
+        public List<Integer> rightViewOfTree() {
+            List<Integer> result = new ArrayList<>();
+            if (root == null) {
+                return result;
+            }
+
+            _rightViewOfTree(root, result, 0, new Integer(-1));
+            return result;
+        }
+
+        private void _rightViewOfTree(Node root, List<Integer> levels, int level, Integer maxLevel) {
+            if (root == null) {
+                return;
+            }
+
+            if (maxLevel.intValue() < level) {
+                levels.add(root.data);
+                maxLevel = level;
+            }
+
+            _rightViewOfTree(root.right, levels, level+1, maxLevel);
+            _rightViewOfTree(root.left, levels, level+1, maxLevel);
         }
     }
 }
