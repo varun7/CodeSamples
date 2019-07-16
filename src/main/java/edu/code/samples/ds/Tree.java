@@ -1,8 +1,11 @@
 package edu.code.samples.ds;
 
+import edu.code.samples.judges.LeetCodeProblems;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public interface Tree {
 
@@ -360,6 +363,128 @@ public interface Tree {
 
             _rightViewOfTree(root.right, levels, level+1, maxLevel);
             _rightViewOfTree(root.left, levels, level+1, maxLevel);
+        }
+
+        public Node kthSmallest(int k) {
+            return _kthSmallest(root, k, new AtomicInteger(0));
+        }
+
+        private Node _kthSmallest(Node root, int k, AtomicInteger pk) {
+            if (root == null) {
+                return null;
+            }
+
+            Node node = _kthSmallest(root.left, k, pk);
+
+            if (node != null) {
+                return node;
+            }
+            pk.addAndGet(1);
+            if (pk.get() == k) {
+                return root;
+            }
+
+            node = _kthSmallest(root.right, k, pk);
+            return node;
+        }
+
+        public int maximumSumPathInBinaryTree() {
+            AtomicInteger globalMax = new AtomicInteger(Integer.MIN_VALUE);
+            _maxPathSum(root, globalMax);
+            return globalMax.get();
+        }
+
+        private int _maxPathSum(Node root, AtomicInteger globalMax) {
+            if (root == null) {
+                return 0;
+            }
+
+            int left = _maxPathSum(root.left, globalMax);
+            int right = _maxPathSum(root.right, globalMax);
+            int candidate = left + right + root.data;
+
+            if (globalMax.get() < candidate) {
+                globalMax.set(candidate);
+            }
+
+            int path = root.data + Math.max(left, right);
+            return path > 0 ? path : 0;
+        }
+
+        private final String NULL_NODE = "null";
+        private class SerializationContext {
+            boolean isEmpty;
+            int index;
+
+            public SerializationContext() {
+                isEmpty = true;
+                index = 0;
+            }
+        }
+
+        // Encodes a tree to a single string.
+        public String serializeBinaryTree(Node root) {
+            StringBuilder builder = new StringBuilder();
+            serialize(root, new SerializationContext(), builder);
+            return builder.toString();
+        }
+
+        private void serialize(Node root, SerializationContext context, StringBuilder builder) {
+            append(builder, context, root);
+
+            if (root == null) {
+                return;
+            }
+            serialize(root.left, context, builder);
+            serialize(root.right, context, builder);
+        }
+
+        private void append(StringBuilder builder, SerializationContext context, Node root) {
+            if (context.isEmpty) {
+                context.isEmpty = false;
+            } else {
+                builder.append(",");
+            }
+
+            if (root == null) {
+                builder.append(NULL_NODE);
+            } else {
+                builder.append(root.data);
+            }
+        }
+
+        // Decodes your encoded data to tree.
+        public Node deserializeBinaryTree(String data) {
+            if (data == null) {
+                return null;
+            }
+
+            String[] nodes = data.split(",");
+            if (nodes.length == 0) {
+                return null;
+            }
+            return _construct(nodes, new SerializationContext());
+        }
+
+        private Node _construct(String[] nodes, SerializationContext context) {
+            if (context.index >= nodes.length) {
+                return null;
+            }
+
+            Node newNode = createNode(nodes[context.index++]);
+            if (newNode == null) {
+                return newNode;
+            }
+            newNode.left = _construct(nodes, context);
+            newNode.right = _construct(nodes, context);
+            return newNode;
+        }
+
+        private Node createNode(String n) {
+            if (NULL_NODE.equals(n)) {
+                return null;
+            }
+            return new Node(Integer.valueOf(n));
         }
     }
 }

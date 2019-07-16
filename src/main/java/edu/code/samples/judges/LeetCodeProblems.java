@@ -1,6 +1,7 @@
 package edu.code.samples.judges;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class LeetCodeProblems {
@@ -3066,6 +3067,182 @@ public class LeetCodeProblems {
                 }
             }
             return dp[a.length()][b.length()];
+        }
+    }
+
+
+    /**
+     * Given a non-empty binary tree, find the maximum path sum.
+     *
+     * For this problem, a path is defined as any sequence of nodes from some starting node to any node in the tree along the parent-child connections. The path must contain at least one node and does not need to go through the root.
+     *
+     * Example 1:
+     *
+     * Input: [1,2,3]
+     *
+     *        1
+     *       / \
+     *      2   3
+     *
+     * Output: 6
+     * Example 2:
+     *
+     * Input: [-10,9,20,null,null,15,7]
+     *
+     *    -10
+     *    / \
+     *   9  20
+     *     /  \
+     *    15   7
+     *
+     * Output: 42
+     */
+    static class MaximumPathSumInBinaryTree {
+
+        class TreeNode {
+            int val;
+            TreeNode left;
+            TreeNode right;
+            TreeNode(int x) { val = x; }
+        }
+
+        public int maxPathSum(TreeNode root) {
+            AtomicInteger globalMax = new AtomicInteger(Integer.MIN_VALUE);
+            _maxPathSum(root, globalMax);
+            return globalMax.get();
+        }
+
+        private int _maxPathSum(TreeNode root, AtomicInteger globalMax) {
+
+            if (root == null) {
+                return 0;
+            }
+
+            int left = _maxPathSum(root.left, globalMax);
+            int right = _maxPathSum(root.right, globalMax);
+            int candidate = left + right + root.val;
+
+            if (globalMax.get() < candidate) {
+                globalMax.set(candidate);
+            }
+
+            int path = root.val + Math.max(left, right);
+            return path > 0 ? path : 0;
+        }
+    }
+
+
+    /**
+     * Serialization is the process of converting a data structure or object into a sequence of bits
+     * so that it can be stored in a file or memory buffer, or transmitted across a network connection
+     * link to be reconstructed later in the same or another computer environment.
+     *
+     * Design an algorithm to serialize and deserialize a binary tree.
+     * There is no restriction on how your serialization/deserialization algorithm should work.
+     * You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized
+     * to the original tree structure.
+     *
+     * Example:
+     *
+     * You may serialize the following tree:
+     *
+     *     1
+     *    / \
+     *   2   3
+     *      / \
+     *     4   5
+     *
+     * as "[1,2,3,null,null,4,5]"
+     * Clarification: The above format is the same as how LeetCode serializes a binary tree.
+     * You do not necessarily need to follow this format, so please be creative and come up with different approaches yourself.
+     *
+     * Note: Do not use class member/global/static variables to store states. Your serialize and deserialize algorithms
+     * should be stateless.
+     */
+    static class CodecForBinaryTree {
+
+        class TreeNode {
+            int val;
+            TreeNode left;
+            TreeNode right;
+
+            public TreeNode(int v) { this.val = v;}
+        }
+
+        private final String NULL_NODE = "null";
+        class SerializationContext {
+            boolean isEmpty;
+            int index;
+
+            public SerializationContext() {
+                isEmpty = true;
+                index = 0;
+            }
+        }
+
+        // Encodes a tree to a single string.
+        public String serialize(TreeNode root) {
+            StringBuilder builder = new StringBuilder();
+            serialize(root, new SerializationContext(), builder);
+            return builder.toString();
+        }
+
+        private void serialize(TreeNode root, SerializationContext context, StringBuilder builder) {
+            append(builder, context, root);
+
+            if (root == null) {
+                return;
+            }
+            serialize(root.left, context, builder);
+            serialize(root.right, context, builder);
+        }
+
+        private void append(StringBuilder builder, SerializationContext context, TreeNode root) {
+            if (context.isEmpty) {
+                context.isEmpty = false;
+            } else {
+                builder.append(",");
+            }
+
+            if (root == null) {
+                builder.append(NULL_NODE);
+            } else {
+                builder.append(root.val);
+            }
+        }
+
+        // Decodes your encoded data to tree.
+        public TreeNode deserialize(String data) {
+            if (data == null) {
+                return null;
+            }
+
+            String[] nodes = data.split(",");
+            if (nodes.length == 0) {
+                return null;
+            }
+            return _construct(nodes, new SerializationContext());
+        }
+
+        private TreeNode _construct(String[] nodes, SerializationContext context) {
+            if (context.index >= nodes.length) {
+                return null;
+            }
+
+            TreeNode newNode = createNode(nodes[context.index++]);
+            if (newNode == null) {
+                return newNode;
+            }
+            newNode.left = _construct(nodes, context);
+            newNode.right = _construct(nodes, context);
+            return newNode;
+        }
+
+        private TreeNode createNode(String n) {
+            if (NULL_NODE.equals(n)) {
+                return null;
+            }
+            return new TreeNode(Integer.valueOf(n));
         }
     }
 }
