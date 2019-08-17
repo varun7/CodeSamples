@@ -50,9 +50,10 @@ public class Main {
 //        binaryIndexedTreeDemo();
 //        intervalSearchTreeDemo();
 //        demoInversionPair();
+        demoPrefixTree();
 //        test();
 //        demoConcurrentProducerConsumer();
-        kafkaDemo();
+//        kafkaDemo();
     }
 
     private static void mergeSortDemo() {
@@ -423,7 +424,7 @@ public class Main {
 
     private static void binaryIndexedTreeDemo() {
         int [] array = {1,0,2,1,1,3,0,4,2,5,2,2,3,1,0,2};
-        BinaryIndexedTree tree = new BinaryIndexedTree(array);
+        BinaryIndexedTree tree = new BinaryIndexedTree.RangeSumQueryBIT(array);
         int i = 5;
         System.out.println("\n\nSum of first " + i + " elements = " + tree.query(i));
 
@@ -467,6 +468,10 @@ public class Main {
         System.out.println("Number of inversion pairs = " + pairs.countInversions(input));
     }
 
+    private static void demoPrefixTree() {
+
+    }
+
     private static void demoConcurrentProducerConsumer() {
         ConcurrentProducerConsumer.UniDataBroker broker = new ConcurrentProducerConsumer.UniDataBroker();
         new Thread(new ConcurrentProducerConsumer.ThreadProducer(broker)).start();
@@ -481,16 +486,5 @@ public class Main {
         ConcurrentProducerConsumer.LockBasedBroker lockBasedBroker = new ConcurrentProducerConsumer.LockBasedBroker();
         new Thread(new ConcurrentProducerConsumer.ThreadProducer(lockBasedBroker)).start();
         new Thread(new ConcurrentProducerConsumer.ThreadConsumer(lockBasedBroker)).start();
-    }
-
-    class Pair {
-        char ch;
-        int count;
-    }
-    private static void test() {
-        String s;
-        Comparator<Pair> comparator = (a,b) -> {
-            return a.count - b.count;
-        };
     }
 }

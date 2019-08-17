@@ -1,5 +1,15 @@
 package edu.code.samples.ds;
 
-public class PrefixTree {
-    // TODO: Implement a TRIE.
+import java.util.List;
+
+public interface PrefixTree {
+
+    void add(String word);
+
+    boolean containsPrefix(String prefix);
+
+    List<String> wordsWithPrefix(String prefix);
+
+    boolean isWord(String word);
+
 }

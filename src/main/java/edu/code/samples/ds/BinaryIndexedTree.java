@@ -1,53 +1,50 @@
 package edu.code.samples.ds;
 
-public class BinaryIndexedTree {
+public interface BinaryIndexedTree {
+    void update(int position, int value);
 
-    private int[] input;
-    private int[] tree;
+    int query(int positions);
 
-    public BinaryIndexedTree(int []input) {
-        this.input = input;
-        constructTree();
-        printTree();
-    }
+    class RangeSumQueryBIT implements BinaryIndexedTree {
+        int[] input;
+        int[] tree;
 
-    public BinaryIndexedTree(int n) {
-        tree = new int[n];
-        setAllZeros(tree);
-    }
-
-    public void update(int index, int val) {
-        for (int pos = index+1; pos < tree.length; pos += pos & (-pos)) {
-            tree[pos] += val;
+        public RangeSumQueryBIT(int[] input) {
+            this.input = input;
+            tree = new int[input.length+1];
+            constructTree();
+            printTree();
         }
-    }
 
-    public int query(int index) {
-        int val = 0;
-        for (int i=index; i>0; i -= (i & -i)) {
-            val += tree[i];
+        private void constructTree() {
+            this.tree = new int[input.length + 1];
+            for (int i = 0; i < input.length; i++) {
+                update(i+1, input[i]);
+            }
         }
-        return val;
-    }
 
-    private void constructTree() {
-        this.tree = new int[input.length+1];
-        setAllZeros(tree);
-        for (int i=0; i<input.length; i++) {
-            update(i, input[i]);
+        private void printTree() {
+            System.out.println("\nPrinting Fenwick tree:");
+            for (int i = 0; i < tree.length; i++) {
+                System.out.print(tree[i] + " ");
+            }
         }
-    }
 
-    private void setAllZeros(int[] array) {
-        for (int i=0; i < array.length; i++) {
-            array[i] = 0;
+        @Override
+        public int query(int position) {
+            int sum = 0;
+            for (int i=position; i> 0; i -= (i&-i)) {
+                sum += tree[i];
+            }
+            return sum;
         }
-    }
 
-    private void printTree() {
-        System.out.println("\nPrinting Fenwick tree:");
-        for (int i=0; i<tree.length; i++) {
-            System.out.print(tree[i] + " ");
+        @Override
+        public void update(int position, int value) {
+            for (int i=position; i < tree.length; i += (i&-i)) {
+                tree[i] += value;
+            }
         }
     }
 }
+

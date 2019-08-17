@@ -1,4 +1,7 @@
 package edu.code.samples.judges;
 
-class Solution {
+import java.util.*;
+
+public class Solution {
+
 }

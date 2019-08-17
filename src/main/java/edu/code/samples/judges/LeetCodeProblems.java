@@ -2562,7 +2562,9 @@ public class LeetCodeProblems {
 
     /**
      * https://leetcode.com/problems/substring-with-concatenation-of-all-words/
-     * You are given a string, s, and a list of words, words, that are all of the same length. Find all starting indices of substring(s) in s that is a concatenation of each word in words exactly once and without any intervening characters.
+     * You are given a string, s, and a list of words, words, that are all of the same length.
+     * Find all starting indices of substring(s) in s that is a concatenation of each word in words
+     * exactly once and without any intervening characters.
      *
      * Example 1:
      *
@@ -2638,8 +2640,8 @@ public class LeetCodeProblems {
     /**
      * https://leetcode.com/problems/reverse-nodes-in-k-group/
      * Given a linked list, reverse the nodes of a linked list k at a time and return its modified list.
-     *
-     * k is a positive integer and is less than or equal to the length of the linked list. If the number of nodes is not a multiple of k then left-out nodes in the end should remain as it is.
+     * k is a positive integer and is less than or equal to the length of the linked list.
+     * If the number of nodes is not a multiple of k then left-out nodes in the end should remain as it is.
      *
      * Example:
      *
@@ -3039,8 +3041,8 @@ public class LeetCodeProblems {
 
             char chC = c.charAt(k);
             boolean ans = false;
-            if (i < a.length() && chC == a.charAt(i) && isInterleaveRecursive(i+1, j, k+1)
-            || (j < b.length() && chC == b.charAt(j) && isInterleaveRecursive(i, j+1, k+1))) {
+            if (i < a.length() && chC == a.charAt(i) && isInterleaveMemoized(i+1, j, k+1)
+            || (j < b.length() && chC == b.charAt(j) && isInterleaveMemoized(i, j+1, k+1))) {
                 ans = true;
             }
 
@@ -3072,9 +3074,11 @@ public class LeetCodeProblems {
 
 
     /**
+     * https://leetcode.com/problems/binary-tree-maximum-path-sum/
      * Given a non-empty binary tree, find the maximum path sum.
      *
-     * For this problem, a path is defined as any sequence of nodes from some starting node to any node in the tree along the parent-child connections. The path must contain at least one node and does not need to go through the root.
+     * For this problem, a path is defined as any sequence of nodes from some starting node to any node in the tree
+     * along the parent-child connections. The path must contain at least one node and does not need to go through the root.
      *
      * Example 1:
      *
@@ -3133,6 +3137,7 @@ public class LeetCodeProblems {
 
 
     /**
+     * https://leetcode.com/problems/serialize-and-deserialize-binary-tree/
      * Serialization is the process of converting a data structure or object into a sequence of bits
      * so that it can be stored in a file or memory buffer, or transmitted across a network connection
      * link to be reconstructed later in the same or another computer environment.
@@ -3243,6 +3248,961 @@ public class LeetCodeProblems {
                 return null;
             }
             return new TreeNode(Integer.valueOf(n));
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/couples-holding-hands/
+     * N couples sit in 2N seats arranged in a row and want to hold hands. We want to know the minimum number of swaps so that every couple is sitting side by side. A swap consists of choosing any two people, then they stand up and switch seats.
+     *
+     * The people and seats are represented by an integer from 0 to 2N-1, the couples are numbered in order, the first couple being (0, 1), the second couple being (2, 3), and so on with the last couple being (2N-2, 2N-1).
+     *
+     * The couples' initial seating is given by row[i] being the value of the person who is initially sitting in the i-th seat.
+     *
+     * Example 1:
+     *
+     * Input: row = [0, 2, 1, 3]
+     * Output: 1
+     * Explanation: We only need to swap the second (row[1]) and third (row[2]) person.
+     * Example 2:
+     *
+     * Input: row = [3, 2, 0, 1]
+     * Output: 0
+     * Explanation: All couples are already seated side by side.
+     * Note:
+     *
+     * len(row) is even and in the range of [4, 60].
+     * row is guaranteed to be a permutation of 0...len(row)-1.
+     */
+    static class CouplesHoldingHands {
+        public int minSwapsCouples(int[] row) {
+            int [] position = new int[row.length];
+
+            // Initialize hash.
+            for (int i=0; i<row.length; i++) {
+                position[row[i]] = i;
+            }
+
+            // Scan row from left to right
+            int partner, positionOfPartner, swaps = 0;
+            for (int i=1; i<row.length; i+=2) {
+                partner = partnerOf(row[i-1]);
+                positionOfPartner = position[partner];
+
+                if (positionOfPartner != i) {
+                    swap(row, i, positionOfPartner);
+                    position[row[i]] = i;
+                    position[row[positionOfPartner]] = positionOfPartner;
+                    swaps++;
+                }
+            }
+            return swaps;
+        }
+
+        int partnerOf(int n) {
+            return n % 2 == 0 ? n +1 : n -1;
+        }
+
+        void swap(int[] array, int i, int j) {
+            int temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/counting-bits/
+     * Given a non negative integer number num.
+     * For every numbers i in the range 0 ≤ i ≤ num calculate the number of 1's in their binary
+     * representation and return them as an array.
+     *
+     * Example 1:
+     *
+     * Input: 2
+     * Output: [0,1,1]
+     * Example 2:
+     *
+     * Input: 5
+     * Output: [0,1,1,2,1,2]
+     */
+    static class CountingBits {
+        public int[] countBits(int num) {
+            int [] dp = new int[num+1];
+            int twoPower = 0;
+            for (int i=1; i <= num; i++) {
+                if ((i & i-1) == 0) {
+                    twoPower = i;
+                    dp[i] = 1;
+                } else {
+                    dp[i] = 1 + dp[i-twoPower];
+                }
+            }
+            return dp;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/split-array-largest-sum/
+     * Given an array which consists of non-negative integers and an integer m, you can split the array into m non-empty
+     * continuous subarrays. Write an algorithm to minimize the largest sum among these m subarrays.
+     *
+     * Note:
+     * If n is the length of array, assume the following constraints are satisfied:
+     *
+     * 1 ≤ n ≤ 1000
+     * 1 ≤ m ≤ min(50, n)
+     * Examples:
+     *
+     * Input:
+     * nums = [7,2,5,10,8]
+     * m = 2
+     *
+     * Output:
+     * 18
+     *
+     * Explanation:
+     * There are four ways to split nums into two subarrays.
+     * The best way is to split it into [7,2,5] and [10,8],
+     * where the largest sum among the two subarrays is only 18.
+     *
+     * This is same as painter parition problem.
+     */
+    static class SplitArrayLargestSum {
+
+        class DynamicProgrammingSolution {
+            class BinaryIndexedTree {
+
+                int[] input;
+                int[] tree;
+
+                public BinaryIndexedTree(int[] input) {
+                    this.input = input;
+                    tree = new int[input.length+1];
+                    constructTree();
+                }
+
+                private void constructTree() {
+                    this.tree = new int[input.length + 1];
+                    for (int i = 0; i < input.length; i++) {
+                        update(i+1, input[i]);
+                    }
+                }
+
+                public int query(int itemIndex) {
+                    int sum = 0;
+                    for (int i=itemIndex; i> 0; i -= (i&-i)) {
+                        sum += tree[i];
+                    }
+                    return sum;
+                }
+
+                public void update(int itemIndex, int value) {
+                    for (int i=itemIndex; i < tree.length; i += (i&-i)) {
+                        tree[i] += value;
+                    }
+                }
+
+            }
+
+            public int splitArray(int[] nums, int m) {
+                BinaryIndexedTree tree = new BinaryIndexedTree(nums);
+                int[][] dp = new int[m][nums.length];
+
+                // When there's no partition.
+                dp[0][0] = nums[0];
+                for (int i=1; i<dp[0].length; i++) {
+                    dp[0][i] = dp[0][i-1] + nums[i];
+                }
+
+                // When there's only one element in the array.
+                for (int i=1; i<dp.length; i++) {
+                    dp[i][0] = nums[0];
+                }
+
+                for (int i=1; i<dp.length; i++) {
+                    for (int j=1; j<dp[0].length; j++) {
+                        int max = Integer.MAX_VALUE;
+                        for (int k=0; k<j; k++) {
+                            max = Math.min(max, Math.max(dp[i-1][k], tree.query(j+1) - tree.query(k+1)));
+                        }
+                        dp[i][j] = max;
+                    }
+                }
+                return dp[m-1][dp[0].length-1];
+            }
+        }
+
+        class BinarySearchSolution {
+            int[] nums;
+
+            public int splitArray(int[] nums, int m) {
+                this.nums = nums;
+                long lo = 0, hi = 0;
+
+                for (int i=0; i<nums.length; i++) {
+                    hi += nums[i];
+                    lo = Math.max(lo, nums[i]);
+                }
+
+                // hi = case when there's no partition.
+                // lo = case when we pick the largest element in array as one partition.
+                // we iterate between lo and hi and count the number of splits for
+                while (lo < hi) {
+                    long mid = lo + (hi - lo)/2;
+                    int splits = countSplit(mid);
+
+                    if (splits > m) {
+                        lo = mid + 1;
+                    } else {
+                        hi = mid - 1;
+                    }
+                }
+                return (int) lo;
+            }
+
+            private int countSplit(long limit) {
+                int splits = 0;
+                for (int i=0; i<nums.length; splits++) {
+                    long sum = 0;
+                    while (i < nums.length && sum + nums[i] <= limit) {
+                        sum += nums[i];
+                        i++;
+                    }
+                }
+                return splits;
+            }
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/all-oone-data-structure/
+     * Implement a data structure supporting the following operations:
+     *
+     * Inc(Key) - Inserts a new key with value 1. Or increments an existing key by 1. Key is guaranteed to be a non-empty string.
+     * Dec(Key) - If Key's value is 1, remove it from the data structure. Otherwise decrements an existing key by 1. If the key does not exist, this function does nothing. Key is guaranteed to be a non-empty string.
+     * GetMaxKey() - Returns one of the keys with maximal value. If no element exists, return an empty string "".
+     * GetMinKey() - Returns one of the keys with minimal value. If no element exists, return an empty string "".
+     * Challenge: Perform all these in O(1) time complexity.
+     */
+    static class AllOne {
+
+        private Map<String, Bucket> map;
+        private Bucket start;
+        private Bucket end;
+
+        static class Bucket {
+            int frequency;
+            Set<String> keys;
+            Bucket prev;
+            Bucket next;
+
+            public Bucket(int frequency, String key) {
+                Set<String> keys = new HashSet<>();
+                keys.add(key);
+                this.frequency  = frequency; this.keys = keys;
+            }
+
+            public void addKey(String key) {
+                this.keys.add(key);
+            }
+
+            public void removeKey(String key) {
+                this.keys.remove(key);
+            }
+
+            public static void addAfter(Bucket currentBucket, Bucket newBucket) {
+                Bucket nextBucket = currentBucket.next;
+                currentBucket.next = newBucket;
+                nextBucket.prev = newBucket;
+                newBucket.prev = currentBucket;
+                newBucket.next = nextBucket;
+            }
+
+            public static void delete(Bucket bucket) {
+                Bucket prev = bucket.prev;
+                Bucket next = bucket.next;
+                prev.next = next;
+                next.prev = prev;
+            }
+        }
+
+        public AllOne() {
+            map = new HashMap<>();
+            start = new Bucket(Integer.MIN_VALUE, "");
+            end = new Bucket(Integer.MAX_VALUE, "");
+            start.next = end;
+            end.prev = start;
+        }
+
+        /** Inserts a new key <Key> with value 1. Or increments an existing key by 1. */
+        public void inc(String key) {
+            // When the key doesn't exist.
+            if (!map.containsKey(key)) {
+                Bucket newBucket;
+                if (start.next.frequency == 1) {
+                    start.next.addKey(key);
+                    newBucket = start.next;
+                } else {
+                    newBucket = new Bucket(1, key);
+                    Bucket.addAfter(start, newBucket);
+                }
+                map.put(key, newBucket);
+                return;
+            }
+
+            // Key already exist.
+            Bucket bucket = map.get(key);
+            Bucket nextBucket = bucket.next;
+            Bucket newBucket;
+            if (nextBucket.frequency == bucket.frequency + 1) {
+                nextBucket.addKey(key);
+                newBucket = nextBucket;
+            } else {
+                newBucket = new Bucket(bucket.frequency + 1, key);
+                Bucket.addAfter(bucket, newBucket);
+            }
+            map.put(key, newBucket);
+
+            bucket.removeKey(key);
+            if (bucket.keys.isEmpty()) {
+                Bucket.delete(bucket);
+            }
+        }
+
+        /** Decrements an existing key by 1. If Key's value is 1, remove it from the data structure. */
+        public void dec(String key) {
+            if (!map.containsKey(key)) {
+                return;
+            }
+            Bucket bucket = map.get(key);
+            int freq = bucket.frequency;
+
+            map.remove(key);
+            if (freq > 1) {
+                Bucket newBucket = null;
+                if (bucket.prev.frequency == freq - 1) {
+                    newBucket = bucket.prev;
+                    bucket.prev.addKey(key);
+                } else {
+                    newBucket = new Bucket(freq-1, key);
+                    Bucket.addAfter(bucket.prev, newBucket);
+                }
+                map.put(key, newBucket);
+            }
+
+            bucket.removeKey(key);
+            if (bucket.keys.isEmpty()) {
+                Bucket.delete(bucket);
+            }
+        }
+
+        /** Returns one of the keys with maximal value. */
+        public String getMaxKey() {
+            return end.prev.keys.stream().findFirst().orElse("");
+        }
+
+        /** Returns one of the keys with Minimal value. */
+        public String getMinKey() {
+            return start.next.keys.stream().findFirst().orElse("");
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/k-th-smallest-in-lexicographical-order/
+     * Given integers n and k, find the lexicographically k-th smallest integer in the range from 1 to n.
+     *
+     * Note: 1 ≤ k ≤ n ≤ 109.
+     *
+     * Example:
+     *
+     * Input:
+     * n: 13   k: 2
+     *
+     * Output:
+     * 10
+     *
+     * Explanation:
+     * The lexicographical order is [1, 10, 11, 12, 13, 2, 3, 4, 5, 6, 7, 8, 9], so the second smallest number is 10.
+     */
+    static class KthSmallestInLexicographicOrder {
+
+        /**
+         * consider it as prefix-tree.
+         */
+        class OptimalPreorderSearchBySkipping {
+
+            public int findKthNumber(int n, int k) {
+                int prefix = 1;
+                k--;
+                while (k > 0) {
+                    long prefixCount = itemsWithPrefix(prefix, n);
+                    if (prefixCount < k) {
+                        prefix += 1;
+                        k -= prefixCount;
+                    } else if (prefixCount > k) {
+                        k -= 1;
+                        prefix *= 10;
+                    } else {
+                        return prefix+1;
+                    }
+                }
+                return prefix;
+            }
+
+            /**
+             * Traverses in leftmost and rightmost branches of a prefix and considers their difference i.e. number
+             * of elements between them in a given level.
+             */
+            private long itemsWithPrefix(int p, int n) {
+                long left = p, right = p, skipped = 0;
+                while (left<=n) {
+                    skipped += Math.min(right, n) - left + 1;
+                    left *= 10;
+                    right = right * 10 + 9;
+                }
+                return skipped;
+            }
+        }
+
+
+        /**
+         * Consider this as prefix tree and do an in-order traversal.
+         */
+        class PreorderTraversal {
+            int count, n, k, ans;
+
+            public int findKthNumber(int n, int k) {
+                this.n = n;
+                this.k = k;
+                this.count = 0;
+                this.ans = -1;
+
+                for (int i=1; i <= 9 && ans == -1; i++) {
+                    preOrderTraversal(i);
+                }
+                return ans;
+            }
+
+            void preOrderTraversal(int value) {
+                if (value > n) {
+                    return;
+                }
+                count++;
+                if (count == k) {
+                    this.ans = value;
+                    return;
+                }
+
+                for (int i=0; i<=9 && ans == -1; i++) {
+                    preOrderTraversal(value*10 + i);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/zuma-game/
+     * Think about Zuma Game. You have a row of balls on the table, colored red(R), yellow(Y), blue(B), green(G), and white(W).
+     * You also have several balls in your hand.
+     *
+     * Each time, you may choose a ball in your hand, and insert it into the row (including the leftmost place and rightmost place).
+     * Then, if there is a group of 3 or more balls in the same color touching, remove these balls.
+     * Keep doing this until no more balls can be removed.
+     *
+     * Find the minimal balls you have to insert to remove all the balls on the table. If you cannot remove all the balls, output -1.
+     *
+     * Examples:
+     *
+     * Input: "WRRBBW", "RB"
+     * Output: -1
+     * Explanation: WRRBBW -> WRR[R]BBW -> WBBW -> WBB[B]W -> WW
+     *
+     * Input: "WWRRBBWW", "WRBRW"
+     * Output: 2
+     * Explanation: WWRRBBWW -> WWRR[R]BBWW -> WWBBWW -> WWBB[B]WW -> WWWW -> empty
+     *
+     * Input:"G", "GGGGG"
+     * Output: 2
+     * Explanation: G -> G[G] -> GG[G] -> empty
+     *
+     * Input: "RBYYBBRRB", "YRBGB"
+     * Output: 3
+     * Explanation: RBYYBBRRB -> RBYY[Y]BBRRB -> RBBBRRB -> RRRB -> B -> B[B] -> BB[B] -> empty
+     *
+     * Note:
+     * You may assume that the initial row of balls on the table won’t have any 3 or more consecutive balls with the same color.
+     * The number of balls on the table won't exceed 20, and the string represents these balls is called "board" in the input.
+     * The number of balls in your hand won't exceed 5, and the string represents these balls is called "hand" in the input.
+     * Both input strings will be non-empty and only contain characters 'R','Y','B','G','W'.
+     */
+    static class Zuma {
+
+        private static int NO_RESULT = 1000;
+
+        public int findMinStep(String board, String hand) {
+            int[] hash = new int[128];
+            for(char ch : hand.toCharArray()) {
+                hash[ch]++;
+            }
+            int result = minSolve(board, hash);
+            return result == NO_RESULT ? -1 : result;
+        }
+
+        // This is a simple brute force solution.
+        int minSolve(String board, int[] hash) {
+            if (board.isEmpty()) {
+                return 0;
+            }
+
+            int result = NO_RESULT;
+            for (int i=0, j; i<board.length(); i = j) {
+                char ch = board.charAt(i);
+                for (j=i+1; j < board.length() && ch == board.charAt(j); j++) { ; }
+
+                int required = 3 - (j - i);
+                // If a move is possible then make it.
+                if (hash[ch] >= required) {
+                    int usedFromHand = required < 0 ? 0 : required;
+                    hash[ch] -= usedFromHand;
+
+                    int interimResult = minSolve(board.substring(0, i) + board.substring(j), hash);
+                    result = Math.min(result, interimResult + usedFromHand);
+
+                    // Undo the move.
+                    hash[ch] += usedFromHand;
+                }
+            }
+            return result;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/super-washing-machines/
+     * You have n super washing machines on a line. Initially, each washing machine has some dresses or is empty.
+     *
+     * For each move, you could choose any m (1 ≤ m ≤ n) washing machines, and pass one dress of each washing machine
+     * to one of its adjacent washing machines at the same time .
+     *
+     * Given an integer array representing the number of dresses in each washing machine from left to right on the line,
+     * you should find the minimum number of moves to make all the washing machines have the same number of dresses.
+     * If it is not possible to do it, return -1.
+     *
+     * Example1
+     *
+     * Input: [1,0,5]
+     *
+     * Output: 3
+     *
+     * Explanation:
+     * 1st move:    1     0 <-- 5    =>    1     1     4
+     * 2nd move:    1 <-- 1 <-- 4    =>    2     1     3
+     * 3rd move:    2     1 <-- 3    =>    2     2     2
+     * Example2
+     *
+     * Input: [0,3,0]
+     *
+     * Output: 2
+     *
+     * Explanation:
+     * 1st move:    0 <-- 3     0    =>    1     2     0
+     * 2nd move:    1     2 --> 0    =>    1     1     1
+     * Example3
+     *
+     * Input: [0,2,0]
+     *
+     * Output: -1
+     *
+     * Explanation:
+     * It's impossible to make all the three washing machines have the same number of dresses.
+     * Note:
+     * The range of n is [1, 10000].
+     * The range of dresses number in a super washing machine is [0, 1e5].
+     */
+    static class SuperWashingMachines {
+
+        // Check explanation: https://leetcode.com/problems/super-washing-machines/discuss/235584/Explanation-of-Java-O(n)-solution
+        public int findMinMoves(int[] machines) {
+            int sum = 0;
+            for (int m: machines) {
+                sum += m;
+            }
+
+            if(sum % machines.length != 0)  {
+                return -1;
+            }
+
+            int avg = sum/machines.length;
+
+            int diff, balance = 0, maxTo = 0, maxFrom = 0;
+            for (int clothes: machines) {
+                diff = clothes - avg;
+                balance += diff;
+                maxTo = Math.max(maxTo, Math.abs(balance));
+                maxFrom = Math.max(maxFrom, diff);
+            }
+            return Math.max(maxTo, maxFrom);
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/non-negative-integers-without-consecutive-ones
+     * Given a positive integer n, find the number of non-negative integers less than or equal to n, whose binary
+     * representations do NOT contain consecutive ones.
+     *
+     * Example 1:
+     * Input: 5
+     * Output: 5
+     * Explanation:
+     * Here are the non-negative integers <= 5 with their corresponding binary representations:
+     * 0 : 0
+     * 1 : 1
+     * 2 : 10
+     * 3 : 11
+     * 4 : 100
+     * 5 : 101
+     * Among them, only integer 3 disobeys the rule (two consecutive ones) and the other 5 satisfy the rule.
+     * Note: 1 <= n <= 109
+     */
+    static class NonNegativeIntegersWithoutConsecutiveOnes {
+        int count;
+        public int findIntegers(int num) {
+            count = 1;
+            recursiveFind(1, num, true);
+            return count;
+        }
+
+        private void recursiveFind(int val, int num, boolean previousWasOne) {
+            if (val > num) {
+                return;
+            }
+            count++;
+
+            recursiveFind(val<<1, num, false);
+            if (!previousWasOne) {
+                recursiveFind(val<<1 | 1, num, true);
+            }
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/snapshot-array/
+     * Implement a SnapshotArray that supports the following interface:
+     *
+     * SnapshotArray(int length) initializes an array-like data structure with the given length.  Initially, each element equals 0.
+     * void set(index, val) sets the element at the given index to be equal to val.
+     * int snap() takes a snapshot of the array and returns the snap_id: the total number of times we called snap() minus 1.
+     * int get(index, snap_id) returns the value at the given index, at the time we took the snapshot with the given snap_id
+     *
+     *
+     * Example 1:
+     *
+     * Input: ["SnapshotArray","set","snap","set","get"]
+     * [[3],[0,5],[],[0,6],[0,0]]
+     * Output: [null,null,0,null,5]
+     * Explanation:
+     * SnapshotArray snapshotArr = new SnapshotArray(3); // set the length to be 3
+     * snapshotArr.set(0,5);  // Set array[0] = 5
+     * snapshotArr.snap();  // Take a snapshot, return snap_id = 0
+     * snapshotArr.set(0,6);
+     * snapshotArr.get(0,0);  // Get the value of array[0] with snap_id = 0, return 5
+     */
+    static class SnapshotArray {
+
+        List<Map<Integer, Integer>> snaps;
+        Map<Integer, Integer> activeMap;
+        int snapId = -1;
+
+        public SnapshotArray(int length) {
+            snaps = new ArrayList<>();
+            activeMap = new HashMap<>();
+        }
+
+        public void set(int index, int val) {
+            activeMap.put(index, val);
+        }
+
+        public int snap() {
+            snapId++;
+            snaps.add(activeMap);
+            activeMap = new HashMap<>();
+            return snapId;
+        }
+
+        public int get(int index, int snap_id) {
+            for (int i = snap_id; i >=0; i--) {
+                if (snaps.get(i).containsKey(index)) {
+                    return snaps.get(i).get(index);
+                }
+            }
+            return 0;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/k-closest-points-to-origin/
+     * We have a list of points on the plane.  Find the K closest points to the origin (0, 0).
+     *
+     * (Here, the distance between two points on a plane is the Euclidean distance.)
+     *
+     * You may return the answer in any order.  The answer is guaranteed to be unique (except for the order that it is in.)
+     *
+     *
+     *
+     * Example 1:
+     *
+     * Input: points = [[1,3],[-2,2]], K = 1
+     * Output: [[-2,2]]
+     * Explanation:
+     * The distance between (1, 3) and the origin is sqrt(10).
+     * The distance between (-2, 2) and the origin is sqrt(8).
+     * Since sqrt(8) < sqrt(10), (-2, 2) is closer to the origin.
+     * We only want the closest K = 1 points from the origin, so the answer is just [[-2,2]].
+     * Example 2:
+     *
+     * Input: points = [[3,3],[5,-1],[-2,4]], K = 2
+     * Output: [[3,3],[-2,4]]
+     * (The answer [[-2,4],[3,3]] would also be accepted.)
+     */
+    static class KClosestPointsToOrigin {
+
+        Comparator<int[]> comparator = (a, b) -> {
+            double da = Math.sqrt(a[0] * a[0] + a[1] * a[1]);
+            double db = Math.sqrt(b[0] * b[0] + b[1] * b[1]);
+            if (da < db) {
+                return -1;
+            } else if (da == db) {
+                return 0;
+            }
+            return 1;
+        };
+
+        // Can also be done use Kth or median find algo that'll work in O(n).
+        public int[][] kClosest(int[][] points, int K) {
+            Arrays.sort(points, comparator);
+            int[][] result = new int[K][2];
+            for (int i=0; i<K; i++) {
+                result[i][0] = points[i][0];
+                result[i][1] = points[i][1];
+            }
+            return result;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/odd-even-jump/
+     * You are given an integer array A.  From some starting index, you can make a series of jumps.
+     * The (1st, 3rd, 5th, ...) jumps in the series are called odd numbered jumps, and the (2nd, 4th, 6th, ...) jumps
+     * in the series are called even numbered jumps.
+     *
+     * You may from index i jump forward to index j (with i < j) in the following way:
+     *
+     * During odd numbered jumps (ie. jumps 1, 3, 5, ...), you jump to the index j such that A[i] <= A[j] and A[j] is
+     * the smallest possible value.  If there are multiple such indexes j, you can only jump to the smallest such index j.
+     * During even numbered jumps (ie. jumps 2, 4, 6, ...), you jump to the index j such that A[i] >= A[j] and A[j]
+     * is the largest possible value.  If there are multiple such indexes j, you can only jump to the smallest such index j.
+     * (It may be the case that for some index i, there are no legal jumps.)
+     * A starting index is good if, starting from that index, you can reach the end of the array (index A.length - 1) by
+     * jumping some number of times (possibly 0 or more than once.)
+     *
+     * Return the number of good starting indexes.
+     *
+     *
+     *
+     * Example 1:
+     *
+     * Input: [10,13,12,14,15]
+     * Output: 2
+     * Explanation:
+     * From starting index i = 0, we can jump to i = 2 (since A[2] is the smallest among A[1], A[2], A[3], A[4] that is greater or equal to A[0]), then we can't jump any more.
+     * From starting index i = 1 and i = 2, we can jump to i = 3, then we can't jump any more.
+     * From starting index i = 3, we can jump to i = 4, so we've reached the end.
+     * From starting index i = 4, we've reached the end already.
+     * In total, there are 2 different starting indexes (i = 3, i = 4) where we can reach the end with some number of jumps.
+     * Example 2:
+     *
+     * Input: [2,3,1,1,4]
+     * Output: 3
+     * Explanation:
+     * From starting index i = 0, we make jumps to i = 1, i = 2, i = 3:
+     *
+     * During our 1st jump (odd numbered), we first jump to i = 1 because A[1] is the smallest value in (A[1], A[2], A[3], A[4]) that is greater than or equal to A[0].
+     *
+     * During our 2nd jump (even numbered), we jump from i = 1 to i = 2 because A[2] is the largest value in (A[2], A[3], A[4]) that is less than or equal to A[1].  A[3] is also the largest value, but 2 is a smaller index, so we can only jump to i = 2 and not i = 3.
+     *
+     * During our 3rd jump (odd numbered), we jump from i = 2 to i = 3 because A[3] is the smallest value in (A[3], A[4]) that is greater than or equal to A[2].
+     *
+     * We can't jump from i = 3 to i = 4, so the starting index i = 0 is not good.
+     *
+     * In a similar manner, we can deduce that:
+     * From starting index i = 1, we jump to i = 4, so we reach the end.
+     * From starting index i = 2, we jump to i = 3, and then we can't jump anymore.
+     * From starting index i = 3, we jump to i = 4, so we reach the end.
+     * From starting index i = 4, we are already at the end.
+     * In total, there are 3 different starting indexes (i = 1, i = 3, i = 4) where we can reach the end with some number of jumps.
+     * Example 3:
+     *
+     * Input: [5,1,3,4,2]
+     * Output: 3
+     * Explanation:
+     * We can reach the end from starting indexes 1, 2, and 4.
+     */
+    static class OddEvenJump {
+
+        public int oddEvenJumps(int[] input) {
+            boolean even[] = new boolean[input.length];
+            boolean odd[] = new boolean[input.length];
+            even[input.length-1] = true;
+            odd[input.length-1] = true;
+
+            // V. Imp property of tree map is it gives next lower and higher key.
+            TreeMap<Integer, Integer> treeMap = new TreeMap<>();
+            treeMap.put(input[input.length-1], input.length-1);
+
+            for (int i=input.length-2; i>=0; i--) {
+                int val = input[i];
+                if (treeMap.containsKey(val)) {
+                    odd[i] = even[treeMap.get(val)];
+                    even[i] = odd[treeMap.get(val)];
+                } else {
+                    Integer justSmaller = treeMap.lowerKey(val);
+                    Integer justGreater = treeMap.higherKey(val);
+
+                    if (justSmaller != null) {
+                        even[i] = odd[treeMap.get(justSmaller)];
+                    }
+
+                    if (justGreater != null) {
+                        odd[i] = even[treeMap.get(justGreater)];
+                    }
+                }
+                treeMap.put(val, i);
+            }
+
+            int count = 0;
+            for (boolean oddStart: odd) {
+                if (oddStart) {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/longest-consecutive-sequence/
+     * Given an unsorted array of integers, find the length of the longest consecutive elements sequence.
+     *
+     * Your algorithm should run in O(n) complexity.
+     *
+     * Example:
+     *
+     * Input: [100, 4, 200, 1, 3, 2]
+     * Output: 4
+     * Explanation: The longest consecutive elements sequence is [1, 2, 3, 4]. Therefore its length is 4.
+     */
+    static class LongestConsecutiveSequence {
+
+        public int longestConsecutive(int[] nums) {
+
+            // Preprocessing step.
+            Set<Integer> set = new HashSet<>();
+            for (int i=0; i<nums.length; i++) {
+                set.add(nums[i]);
+            }
+
+            int max = 0;
+            for (int num: set) {
+                if (!set.contains(num-1)) {
+                    int count = 1;
+                    int start = num;
+                    while (set.contains(start+1)) {
+                        count++;
+                        start++;
+                    }
+                    max = Math.max(max, count);
+                }
+            }
+            return max;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/koko-eating-bananas/
+     * Koko loves to eat bananas.  There are N piles of bananas, the i-th pile has piles[i] bananas.
+     * The guards have gone and will come back in H hours.
+     *
+     * Koko can decide her bananas-per-hour eating speed of K.  Each hour, she chooses some pile of bananas, and
+     * eats K bananas from that pile.  If the pile has less than K bananas, she eats all of them instead, and won't
+     * eat any more bananas during this hour.
+     *
+     * Koko likes to eat slowly, but still wants to finish eating all the bananas before the guards come back.
+     *
+     * Return the minimum integer K such that she can eat all the bananas within H hours.
+     *
+     *
+     *
+     * Example 1:
+     *
+     * Input: piles = [3,6,7,11], H = 8
+     * Output: 4
+     * Example 2:
+     *
+     * Input: piles = [30,11,23,4,20], H = 5
+     * Output: 30
+     * Example 3:
+     *
+     * Input: piles = [30,11,23,4,20], H = 6
+     * Output: 23
+     *
+     *
+     * Note:
+     *
+     * 1 <= piles.length <= 10^4
+     * piles.length <= H <= 10^9
+     * 1 <= piles[i] <= 10^9
+     */
+    static class KokoEatingBanana {
+
+        public int minEatingSpeed(int[] piles, int h) {
+            int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+            for (int i=0; i<piles.length; i++) {
+                max = Math.max(max, piles[i]);
+            }
+
+            int lo = 1, hi = max;
+            while (lo < hi) {
+                int mid = lo + (hi-lo)/2;
+                if (canEatAll(piles, h, mid)) {
+                    hi = mid;
+                } else {
+                    lo = mid+1;
+                }
+            }
+            return lo;
+        }
+
+        private boolean canEatAll(int[] piles, int h, int k) {
+            int count = 0;
+            for (int i=0; i<piles.length; i++) {
+                count += piles[i]/k;
+                if (piles[i]%k != 0) {
+                    count++;
+                }
+            }
+            return count <= h;
         }
     }
 }

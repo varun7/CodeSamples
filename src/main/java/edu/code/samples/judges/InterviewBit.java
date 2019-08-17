@@ -2,17 +2,7 @@ package edu.code.samples.judges;
 
 import edu.code.samples.ds.Graph;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class InterviewBit {
@@ -43,8 +33,8 @@ public class InterviewBit {
                 return a.get(0);
             }
 
-            int n1 = Integer.MAX_VALUE; int c1 = 0;
-            int n2 = Integer.MAX_VALUE; int c2 = 0;
+            int n1 = Integer.MAX_VALUE, c1 = 0;
+            int n2 = Integer.MAX_VALUE, c2 = 0;
             int n;
 
             for (int i = 0; i < a.size(); i++) {
@@ -899,6 +889,37 @@ public class InterviewBit {
         private long sumOfInterval(int from, int to) {
             return tree.query(to) - tree.query(from);
         }
+
+        public int paintBinarySearch(int painters, int time, ArrayList<Integer> board) {
+            long lo = 0, hi=0;
+            for (int b: board) {
+                lo = Math.max(lo, b);
+                hi += b;
+            }
+
+            while (lo < hi) {
+                long mid = lo + (hi-lo)/2;
+                if (isPossible(board, painters, mid)) {
+                    hi = mid;
+                } else {
+                    lo = mid + 1;
+                }
+            }
+            long ans = ((lo%10000003)*(time%10000003))%10000003;
+            return (int) ans;
+        }
+
+        private boolean isPossible(ArrayList<Integer> A, int painters, long k) {
+            long total = 0, reqPainters = 1;
+            for(Integer a : A){
+                total += a;
+                if(total > k){
+                    total = a;
+                    reqPainters++;
+                }
+            }
+            return reqPainters <= painters;
+        }
     }
 
     /**
@@ -990,7 +1011,8 @@ public class InterviewBit {
 
     /**
      * https://www.interviewbit.com/problems/distinct-subsequences/
-     * Given two sequences S, T, count number of unique ways in sequence S, to form a subsequence that is identical to the sequence T.
+     * Given two sequences S, T, count number of unique ways in sequence S, to form a subsequence that is
+     * identical to the sequence T.
      *
      *  Subsequence : A subsequence of a string is a new string which is formed from the original string by deleting
      *  some (can be none ) of the characters without disturbing the relative positions of the remaining characters.
@@ -1161,6 +1183,322 @@ public class InterviewBit {
                 }
             }
             return result;
+        }
+    }
+
+    /**
+     * https://www.interviewbit.com/problems/word-break-ii/
+     * Given a string s and a dictionary of words dict, add spaces in s to construct a sentence where each word is a valid dictionary word.
+     *
+     * Return all such possible sentences.
+     *
+     * For example, given
+     *
+     * s = "catsanddog",
+     * dict = ["cat", "cats", "and", "sand", "dog"].
+     * A solution is
+     *
+     * [
+     *   "cat sand dog",
+     *   "cats and dog"
+     * ]
+     */
+    public static class WordBreakII {
+
+        interface PrefixTree {
+
+            void add(String word);
+
+            List<String> wordsWithPrefix(String prefix);
+
+            boolean isWord(String word);
+
+            boolean containsPrefix(String prefix);
+        }
+
+        class Trie implements PrefixTree {
+
+            private class Node {
+                Node[] children;
+                char ch;
+                boolean word;
+
+                public Node(char ch, boolean word) {
+                    children = new Node[26];
+                    this.ch = ch;
+                    this.word = word;
+                }
+            }
+
+            private Node root = new Node('#', false);
+
+            @Override
+            public void add(String word) {
+                Node ptr = root;
+                for (char ch: word.toCharArray()) {
+                    int index = ch - 'a';
+                    if (ptr.children[index] == null) {
+                        ptr.children[index] = new Node(ch, false);
+                    }
+                    ptr = ptr.children[index];
+                }
+                ptr.word = true;
+            }
+
+            @Override
+            public List<String> wordsWithPrefix(String prefix) {
+                List<String> wordList = new ArrayList<>();
+                Node ptr = find(prefix);
+                if (ptr== null) {
+                    return wordList;
+                }
+
+                // Do pre-order traversal of the tree and add all words to the list.
+                preOrderTraversal(ptr, wordList, prefix);
+                return wordList;
+            }
+
+            private void preOrderTraversal(Node ptr, List<String> wordList, String word) {
+                if (ptr == null) {
+                    return;
+                }
+
+                if (ptr.word) {
+                    wordList.add(word);
+                }
+
+                for (int i=0; i<ptr.children.length; i++) {
+                    char ch = (char) ('a' + i);
+                    preOrderTraversal(ptr.children[i], wordList, word + ch);
+                }
+
+            }
+
+            @Override
+            public boolean isWord(String word) {
+                Node ptr = find(word);
+                if (ptr == null) {
+                    return false;
+                }
+                return ptr.word;
+            }
+
+            @Override
+            public boolean containsPrefix(String prefix) {
+                return find(prefix) != null;
+            }
+
+            private Node find(String word) {
+                Node ptr = root;
+                for (char ch: word.toCharArray()) {
+                    int index = ch - 'a';
+                    if (ptr.children[index] == null) {
+                        return null;
+                    }
+                    ptr = ptr.children[index];
+                }
+                return ptr;
+            }
+        }
+
+        public ArrayList<String> wordBreak(String s, ArrayList<String> wordDict) {
+            PrefixTree tree = constructTrie(wordDict);
+            ArrayList<String> list = new ArrayList<>();
+            findAllSentences(tree, list, s, "");
+            return list;
+        }
+
+        private void findAllSentences(PrefixTree trie, List<String> result, String s, String sentence) {
+            if (s.isEmpty()) {
+                result.add(sentence);
+                return;
+            }
+
+            String w = "";
+            for (int i=0; i<s.length(); i++) {
+                w += s.charAt(i);
+
+                if (!trie.containsPrefix(w)) {
+                    return;
+                }
+
+                if (trie.isWord(w)) {
+                    String newSentence = sentence.isEmpty() ? w : sentence + " " + w;
+                    findAllSentences(trie, result, s.substring(i+1), newSentence);
+                }
+            }
+        }
+
+        private PrefixTree constructTrie(List<String> dictionary) {
+            PrefixTree tree = new Trie();
+            for (String word: dictionary) {
+                tree.add(word);
+            }
+            return tree;
+        }
+    }
+
+    /**
+     * https://www.interviewbit.com/problems/longest-valid-parentheses/
+     * Given a string A containing just the characters ’(‘ and ’)’. Find the length of the longest valid (well-formed) parentheses substring.
+     *
+     * Input Format
+     *
+     * The only argument given is string A.
+     * Output Format
+     *
+     * Return the length of the longest valid (well-formed) parentheses substring.
+     * For Example
+     *
+     * Input 1:
+     *     A = "(()"
+     * Output 1:
+     *     2
+     *     Explanation 1:
+     *         The longest valid parentheses substring is "()", which has length = 2.
+     *
+     * Input 2:
+     *     A = ")()())"
+     * Output 2:
+     *     4
+     *     Explanation 2:
+     *         The longest valid parentheses substring is "()()", which has length = 4.
+     */
+    public static class LongestValidParenthesis {
+        public int longestValidParentheses(String input) {
+            Stack<Integer> stack = new Stack<>();
+            stack.push(-1);
+
+            int max = 0;
+            for (int i=0; i<input.length(); i++) {
+                char ch = input.charAt(i);
+                if (ch == '(') {
+                    stack.push(i);
+                } else {
+                    stack.pop();
+                    if (stack.isEmpty()) {
+                        stack.push(i);
+                    } else {
+                        max = Math.max(max, i - stack.peek());
+                    }
+                }
+            }
+            return max;
+        }
+    }
+
+    /**
+     * https://www.interviewbit.com/problems/add-one-to-number/
+     * Given a non-negative number represented as an array of digits,
+     *
+     * add 1 to the number ( increment the number represented by the digits ).
+     *
+     * The digits are stored such that the most significant digit is at the head of the list.
+     *
+     * Example:
+     *
+     * If the vector has [1, 2, 3]
+     *
+     * the returned vector should be [1, 2, 4]
+     *
+     * as 123 + 1 = 124.
+     */
+    public static class AddOneToNumber {
+        public ArrayList<Integer> plusOne(ArrayList<Integer> input) {
+            sanitizeList(input);
+            boolean carry = true;
+            for (int i= input.size()-1; i>=0 && carry; i--) {
+                int val = input.get(i) + 1;
+                input.set(i, val % 10);
+                carry = (val /10 != 0);
+            }
+
+            if (carry) {
+                input.add(0, 1);
+            }
+            return input;
+        }
+
+        private void sanitizeList(ArrayList<Integer> input) {
+            while (!input.isEmpty() && input.get(0) == 0) {
+                input.remove(0);
+            }
+        }
+    }
+
+    /**
+     * https://www.interviewbit.com/problems/merge-intervals/
+     * Given a set of non-overlapping intervals, insert a new interval into the intervals (merge if necessary).
+     *
+     * You may assume that the intervals were initially sorted according to their start times.
+     *
+     * Example 1:
+     *
+     * Given intervals [1,3],[6,9] insert and merge [2,5] would result in [1,5],[6,9].
+     *
+     * Example 2:
+     *
+     * Given [1,2],[3,5],[6,7],[8,10],[12,16], insert and merge [4,9] would result in [1,2],[3,10],[12,16].
+     *
+     * This is because the new interval [4,9] overlaps with [3,5],[6,7],[8,10].
+     *
+     * Make sure the returned intervals are also sorted.
+     */
+    public static class MergeIntervals {
+
+        class Interval {
+            int start;
+            int end;
+            Interval() { start = 0; end = 0; }
+            Interval(int s, int e) { start = s; end = e; }
+        }
+
+        public ArrayList<Interval> insert(ArrayList<Interval> intervals, Interval newInterval) {
+            ArrayList<Interval> output = new ArrayList<>();
+            if (newInterval.end < newInterval.start) {
+                int temp = newInterval.end;
+                newInterval.end = newInterval.start;
+                newInterval.start = temp;
+            }
+
+            // Copy all smaller elements.
+            int i=0;
+            while (i < intervals.size() && !doOverlap(intervals.get(i), newInterval) && newInterval.start > intervals.get(i).start) {
+                output.add(intervals.get(i));
+                i++;
+            }
+
+            // Merge existing interval with overlapping intervals.
+            while (i < intervals.size() && doOverlap(intervals.get(i), newInterval)) {
+                newInterval = merge(intervals.get(i), newInterval);
+                i++;
+            }
+            output.add(newInterval);
+
+            // Add all other intervals.
+            while (i<intervals.size()) {
+                output.add(intervals.get(i));
+                i++;
+            }
+            return output;
+        }
+
+        private boolean doOverlap(Interval a, Interval b) {
+            if (a.start <= b.start && b.start <= a.end) {
+                return true;
+            }
+
+            if (b.start <=a.start && a.start <= b.end) {
+                return true;
+            }
+            return false;
+        }
+
+        private Interval merge(Interval a, Interval b) {
+            Interval newInterval = new Interval();
+            newInterval.start = Math.min(a.start, b.start);
+            newInterval.end = Math.max(a.end, b.end);
+            return newInterval;
         }
     }
 
