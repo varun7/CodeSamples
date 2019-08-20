@@ -4205,4 +4205,391 @@ public class LeetCodeProblems {
             return count <= h;
         }
     }
+
+
+    /**
+     * https://leetcode.com/problems/word-ladder/
+     * Given two words (beginWord and endWord), and a dictionary's word list, find the length of shortest transformation
+     * sequence from beginWord to endWord, such that:
+     *
+     * Only one letter can be changed at a time.
+     * Each transformed word must exist in the word list. Note that beginWord is not a transformed word.
+     * Note:
+     *
+     * Return 0 if there is no such transformation sequence.
+     * All words have the same length.
+     * All words contain only lowercase alphabetic characters.
+     * You may assume no duplicates in the word list.
+     * You may assume beginWord and endWord are non-empty and are not the same.
+     * Example 1:
+     *
+     * Input:
+     * beginWord = "hit",
+     * endWord = "cog",
+     * wordList = ["hot","dot","dog","lot","log","cog"]
+     *
+     * Output: 5
+     *
+     * Explanation: As one shortest transformation is "hit" -> "hot" -> "dot" -> "dog" -> "cog",
+     * return its length 5.
+     */
+    static class WordLadder {
+
+        class AdjacencyListGraph<V> {
+
+            class Edge {
+                private final double weight;
+                private final V to;
+
+                public Edge(V to, double weight) {
+                    this.weight = weight;
+                    this.to = to;
+                }
+
+
+                public Edge(V to) {
+                    this.weight = 1;
+                    this.to = to;
+                }
+            }
+
+            private Map<V, Set<Edge>> vertexMap;
+            private boolean isDirected = false;
+
+            public AdjacencyListGraph(boolean isDirected) {
+                vertexMap = new HashMap<>();
+                this.isDirected = isDirected;
+            }
+
+            public AdjacencyListGraph() {
+                vertexMap = new HashMap<>();
+            }
+
+            public void insert(V vertex) {
+                if (isPresent(vertex)) {
+                    throw new IllegalArgumentException("Tried to add duplicate node.");
+                }
+                vertexMap.put(vertex, new HashSet<>());
+            }
+
+            public Set<V> successors(V vertex) {
+                if (isPresent(vertex)) {
+                    return vertexMap.get(vertex).stream().map(e -> e.to).collect(Collectors.toSet());
+                }
+                throw new IllegalArgumentException("node is not present in graph");
+            }
+
+            public void connect(V v1, V v2, double weight) {
+                if (!isPresent(v1) || !isPresent(v2)) {
+                    throw new IllegalArgumentException("One or both node not present in graph.");
+                }
+                vertexMap.get(v1).add(new AdjacencyListGraph.Edge(v2, weight));
+
+                if (!isDirected) {
+                    vertexMap.get(v2).add(new AdjacencyListGraph.Edge(v1, weight));
+                }
+            }
+
+            public boolean isPresent(V vertex) {
+                return vertexMap.containsKey(vertex);
+            }
+        }
+
+        public int ladderLength(String start, String end, List<String> dictionary) {
+            dictionary.add(start);
+            if (!dictionary.contains(end)) {
+                return 0;
+            }
+            AdjacencyListGraph<String> ladder = new AdjacencyListGraph<>();
+            Set<String> nodesInGraph = new HashSet<>();
+
+            for (String word : dictionary) {
+                if (!nodesInGraph.contains(word)) {
+                    ladder.insert(word);
+                    nodesInGraph.add(word);
+                    updateGraph(ladder, nodesInGraph, word);
+                }
+            }
+            return bfs(ladder, start, end);
+        }
+
+        class LevelNode {
+            int level;
+            String val;
+            public LevelNode(String v, int l) {this.level = l; this.val = v;}
+        }
+
+        private int bfs(AdjacencyListGraph<String> graph, String source, String destination) {
+            Queue<LevelNode> queue = new ArrayDeque<>();
+            queue.offer(new LevelNode(source, 0));
+            Set<String> explored = new HashSet<>();
+
+            while (!queue.isEmpty()) {
+                LevelNode front = queue.poll();
+
+                if (front.val.equals(destination)) {
+                    return front.level + 1;
+                }
+
+                explored.add(front.val);
+                for (String succ: graph.successors(front.val)) {
+                    if (!explored.contains(succ)) {
+                        queue.add(new LevelNode(succ, front.level+1));
+                    }
+                }
+            }
+            return 0;
+        }
+
+        private void updateGraph(AdjacencyListGraph<String> ladder, Set<String> nodesInGraph, String word) {
+            String similarWord;
+            for (int i=0; i<word.length(); i++) {
+                String prefix = i == 0 ? new StringBuilder(word.charAt(0)).toString() : word.substring(0, i);
+                String suffix = i == word.length() - 1 ? "" : word.substring(i+1);
+                for (char ch = 'a'; ch <= 'z'; ch++) {
+                    similarWord = prefix + ch + suffix;
+                    if (nodesInGraph.contains(similarWord) && !similarWord.equals(word)) {
+                        ladder.connect(word, similarWord, 1.0);
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/word-ladder-ii/
+     * Given two words (beginWord and endWord), and a dictionary's word list, find all shortest transformation sequence(s)
+     * from beginWord to endWord, such that:
+     *
+     * Only one letter can be changed at a time
+     * Each transformed word must exist in the word list. Note that beginWord is not a transformed word.
+     * Note:
+     *
+     * Return an empty list if there is no such transformation sequence.
+     * All words have the same length.
+     * All words contain only lowercase alphabetic characters.
+     * You may assume no duplicates in the word list.
+     * You may assume beginWord and endWord are non-empty and are not the same.
+     * Example 1:
+     *
+     * Input:
+     * beginWord = "hit",
+     * endWord = "cog",
+     * wordList = ["hot","dot","dog","lot","log","cog"]
+     *
+     * Output:
+     * [
+     *   ["hit","hot","dot","dog","cog"],
+     *   ["hit","hot","lot","log","cog"]
+     * ]
+     */
+    static class WordLadderII {
+
+        interface Graph<V> {
+
+            void insert(V vertex);
+
+            Set<V> vertices();
+
+            Set<V> successors(V vertex);
+
+            void connect(V v1, V v2);
+
+            void connect(V v1, V v2, double weight);
+
+            boolean isPresent(V vertex);
+
+            double edgeWeight(V v1, V v2);
+
+
+            class AdjacencyListGraph<V> implements Graph<V> {
+
+                class Edge {
+                    private final double weight;
+                    private final V to;
+
+                    public Edge(V to, double weight) {
+                        this.weight = weight;
+                        this.to = to;
+                    }
+
+
+                    public Edge(V to) {
+                        this.weight = 1;
+                        this.to = to;
+                    }
+                }
+
+                private Map<V, Set<Edge>> vertexMap;
+                private boolean isDirected = false;
+
+                public AdjacencyListGraph(boolean isDirected) {
+                    vertexMap = new HashMap<>();
+                    this.isDirected = isDirected;
+                }
+
+                public AdjacencyListGraph() {
+                    vertexMap = new HashMap<>();
+                }
+
+                @Override
+                public void insert(V vertex) {
+                    if (isPresent(vertex)) {
+                        throw new IllegalArgumentException("Tried to add duplicate node.");
+                    }
+                    vertexMap.put(vertex, new HashSet<>());
+                }
+
+                @Override
+                public Set<V> vertices() {
+                    return vertexMap.keySet();
+                }
+
+                @Override
+                public Set<V> successors(V vertex) {
+                    if (isPresent(vertex)) {
+                        return vertexMap.get(vertex).stream().map(e -> e.to).collect(Collectors.toSet());
+                    }
+                    throw new IllegalArgumentException("node is not present in graph");
+                }
+
+                @Override
+                public void connect(V v1, V v2) {
+                    if (!isPresent(v1) || !isPresent(v2)) {
+                        throw new IllegalArgumentException("One or both node not present in graph.");
+                    }
+                    vertexMap.get(v1).add(new Edge(v2));
+
+                    if (!isDirected) {
+                        vertexMap.get(v2).add(new Edge(v1));
+                    }
+                }
+
+                @Override
+                public void connect(V v1, V v2, double weight) {
+                    if (!isPresent(v1) || !isPresent(v2)) {
+                        throw new IllegalArgumentException("One or both node not present in graph.");
+                    }
+                    vertexMap.get(v1).add(new Edge(v2, weight));
+
+                    if (!isDirected) {
+                        vertexMap.get(v2).add(new Edge(v1, weight));
+                    }
+                }
+
+                @Override
+                public boolean isPresent(V vertex) {
+                    return vertexMap.containsKey(vertex);
+                }
+
+                @Override
+                public double edgeWeight(V v1, V v2) {
+                    Optional<Edge> edge = vertexMap.get(v1).stream().filter(e -> e.to == v2).findFirst();
+                    if (edge.isPresent()) {
+                        return edge.get().weight;
+                    }
+                    throw new IllegalArgumentException("Passed nodes are not connected.");
+                }
+
+                private V nextUnexploredNode(Set<V> explored) {
+                    for (V v: vertices()) {
+                        if (!explored.contains(v)) {
+                            return v;
+                        }
+                    }
+                    return null;
+                }
+            }
+        }
+
+        public List<List<String>> findLadders(String beginWord, String endWord, List<String> dictionary) {
+            dictionary.add(beginWord);
+            //dictionary.add(endWord);
+            Graph<String> ladder = new Graph.AdjacencyListGraph<>();
+            Set<String> nodesInGraph = new HashSet<>();
+
+            for (String word : dictionary) {
+                if (!nodesInGraph.contains(word)) {
+                    ladder.insert(word);
+                    nodesInGraph.add(word);
+                    updateGraph(ladder, nodesInGraph, word);
+                }
+            }
+
+            //dfs(ladder, beginWord, endWord, stack, result, new HashSet<>());
+            return bfs(ladder, beginWord, endWord);
+        }
+
+        private void updateGraph(Graph<String> ladder, Set<String> nodesInGraph, String word) {
+            String similarWord;
+            for (int i=0; i<word.length(); i++) {
+                String prefix = i == 0 ? new StringBuilder(word.charAt(0)).toString() : word.substring(0, i);
+                String suffix = i == word.length() - 1 ? "" : word.substring(i+1);
+                for (char ch = 'a'; ch <= 'z'; ch++) {
+                    similarWord = prefix + ch + suffix;
+                    if (nodesInGraph.contains(similarWord) && !similarWord.equals(word)) {
+                        ladder.connect(word, similarWord, 1.0);
+                    }
+                }
+            }
+        }
+
+
+        private List<List<String>> bfs(Graph<String> graph, String begin, String end) {
+            Queue<String> queue = new ArrayDeque<>();
+            queue.add(begin);
+
+            Map<String, List<List<String>>> trailMap = new HashMap<>();
+            List<List<String>> startList = new ArrayList<>();
+            startList.add(Collections.emptyList());
+            trailMap.put(begin, startList); // Add empty list for begin node.
+
+            Set<String> explored = new HashSet<>();
+
+            while (!queue.isEmpty()) {
+                String front = queue.poll();
+                if (front.equals(end) || explored.contains(front)) {
+                    continue;
+                }
+
+                explored.add(front);
+
+                for (String succ: graph.successors(front)) {
+                    List<List<String>> parentTrail = trailMap.get(front);
+                    if (!explored.contains(succ)) {
+                        queue.offer(succ);
+
+                        List<List<String>> existingTrail = trailMap.get(succ);
+                        if (existingTrail != null && parentTrail.get(0).size() + 1 == existingTrail.get(0).size()) {
+                            List<List<String>> appendToExistingTrail = copyAndCreateNewListAndAddStringToEachList(parentTrail, front);
+                            existingTrail.addAll(appendToExistingTrail);
+                        }
+
+                        if (existingTrail == null) {
+                            trailMap.put(succ, copyAndCreateNewListAndAddStringToEachList(parentTrail, front));
+                        }
+                    }
+                }
+            }
+
+            if (trailMap.containsKey(end)) {
+                return copyAndCreateNewListAndAddStringToEachList(trailMap.get(end), end);
+            }
+            return Collections.emptyList();
+        }
+
+        private  List<List<String>> copyAndCreateNewListAndAddStringToEachList(List<List<String>> source, String front) {
+            List<List<String>> newList = new ArrayList<>(source.size());
+            for (List<String> list: source) {
+                List<String> subList = new ArrayList<>(list.size());
+                for (String s: list) {
+                    subList.add(s);
+                }
+                subList.add(front);
+                newList.add(subList);
+            }
+            return newList;
+        }
+    }
 }

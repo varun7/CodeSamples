@@ -533,6 +533,237 @@ public class InterviewBit {
     }
 
     /**
+     * https://www.interviewbit.com/problems/word-ladder-ii/
+     * Given two words (start and end), and a dictionary, find the shortest transformation sequence from start to end, such that:
+     *
+     * Only one letter can be changed at a time
+     * Each intermediate word must exist in the dictionary
+     * If there are multiple such sequence of shortest length, return all of them. Refer to the example for more details.
+     *
+     * Example :
+     *
+     * Given:
+     *
+     * start = "hit"
+     * end = "cog"
+     * dict = ["hot","dot","dog","lot","log"]
+     * Return
+     *
+     *   [
+     *     ["hit","hot","dot","dog","cog"],
+     *     ["hit","hot","lot","log","cog"]
+     *   ]
+     */
+    public static class WordLadderTwo {
+
+        interface Graph<V> {
+
+            void insert(V vertex);
+
+            Set<V> vertices();
+
+            Set<V> successors(V vertex);
+
+            void connect(V v1, V v2);
+
+            void connect(V v1, V v2, double weight);
+
+            boolean isPresent(V vertex);
+
+            double edgeWeight(V v1, V v2);
+
+
+            class AdjacencyListGraph<V> implements Graph<V> {
+
+                class Edge {
+                    private final double weight;
+                    private final V to;
+
+                    public Edge(V to, double weight) {
+                        this.weight = weight;
+                        this.to = to;
+                    }
+
+
+                    public Edge(V to) {
+                        this.weight = 1;
+                        this.to = to;
+                    }
+                }
+
+                private Map<V, Set<Edge>> vertexMap;
+                private boolean isDirected = false;
+
+                public AdjacencyListGraph(boolean isDirected) {
+                    vertexMap = new HashMap<>();
+                    this.isDirected = isDirected;
+                }
+
+                public AdjacencyListGraph() {
+                    vertexMap = new HashMap<>();
+                }
+
+                @Override
+                public void insert(V vertex) {
+                    if (isPresent(vertex)) {
+                        throw new IllegalArgumentException("Tried to add duplicate node.");
+                    }
+                    vertexMap.put(vertex, new HashSet<>());
+                }
+
+                @Override
+                public Set<V> vertices() {
+                    return vertexMap.keySet();
+                }
+
+                @Override
+                public Set<V> successors(V vertex) {
+                    if (isPresent(vertex)) {
+                        return vertexMap.get(vertex).stream().map(e -> e.to).collect(Collectors.toSet());
+                    }
+                    throw new IllegalArgumentException("node is not present in graph");
+                }
+
+                @Override
+                public void connect(V v1, V v2) {
+                    if (!isPresent(v1) || !isPresent(v2)) {
+                        throw new IllegalArgumentException("One or both node not present in graph.");
+                    }
+                    vertexMap.get(v1).add(new Edge(v2));
+
+                    if (!isDirected) {
+                        vertexMap.get(v2).add(new Edge(v1));
+                    }
+                }
+
+                @Override
+                public void connect(V v1, V v2, double weight) {
+                    if (!isPresent(v1) || !isPresent(v2)) {
+                        throw new IllegalArgumentException("One or both node not present in graph.");
+                    }
+                    vertexMap.get(v1).add(new Edge(v2, weight));
+
+                    if (!isDirected) {
+                        vertexMap.get(v2).add(new Edge(v1, weight));
+                    }
+                }
+
+                @Override
+                public boolean isPresent(V vertex) {
+                    return vertexMap.containsKey(vertex);
+                }
+
+                @Override
+                public double edgeWeight(V v1, V v2) {
+                    Optional<Edge> edge = vertexMap.get(v1).stream().filter(e -> e.to == v2).findFirst();
+                    if (edge.isPresent()) {
+                        return edge.get().weight;
+                    }
+                    throw new IllegalArgumentException("Passed nodes are not connected.");
+                }
+
+                private V nextUnexploredNode(Set<V> explored) {
+                    for (V v: vertices()) {
+                        if (!explored.contains(v)) {
+                            return v;
+                        }
+                    }
+                    return null;
+                }
+            }
+        }
+
+        public ArrayList<ArrayList<String>> findLadders(String beginWord, String endWord, List<String> dictionary) {
+            dictionary.add(beginWord);
+            dictionary.add(endWord);
+            Graph<String> ladder = new Graph.AdjacencyListGraph<>();
+            Set<String> nodesInGraph = new HashSet<>();
+
+            for (String word : dictionary) {
+                if (!nodesInGraph.contains(word)) {
+                    ladder.insert(word);
+                    nodesInGraph.add(word);
+                    updateGraph(ladder, nodesInGraph, word);
+                }
+            }
+
+            //dfs(ladder, beginWord, endWord, stack, result, new HashSet<>());
+            return bfs(ladder, beginWord, endWord);
+        }
+
+        private void updateGraph(Graph<String> ladder, Set<String> nodesInGraph, String word) {
+            String similarWord;
+            for (int i=0; i<word.length(); i++) {
+                String prefix = i == 0 ? new StringBuilder(word.charAt(0)).toString() : word.substring(0, i);
+                String suffix = i == word.length() - 1 ? "" : word.substring(i+1);
+                for (char ch = 'a'; ch <= 'z'; ch++) {
+                    similarWord = prefix + ch + suffix;
+                    if (nodesInGraph.contains(similarWord) && !similarWord.equals(word)) {
+                        ladder.connect(word, similarWord, 1.0);
+                    }
+                }
+            }
+        }
+
+
+        private ArrayList<ArrayList<String>> bfs(Graph<String> graph, String begin, String end) {
+            Queue<String> queue = new ArrayDeque<>();
+            queue.add(begin);
+
+            Map<String, ArrayList<ArrayList<String>>> trailMap = new HashMap<>();
+            ArrayList<ArrayList<String>> startList = new ArrayList<>();
+            startList.add(new ArrayList<>());
+            trailMap.put(begin, startList); // Add empty list for begin node.
+
+            Set<String> explored = new HashSet<>();
+
+            while (!queue.isEmpty()) {
+                String front = queue.poll();
+                if (front.equals(end) || explored.contains(front)) {
+                    continue;
+                }
+
+                explored.add(front);
+
+                for (String succ: graph.successors(front)) {
+                    ArrayList<ArrayList<String>> parentTrail = trailMap.get(front);
+                    if (!explored.contains(succ)) {
+                        queue.offer(succ);
+
+                        ArrayList<ArrayList<String>> existingTrail = trailMap.get(succ);
+                        if (existingTrail != null && parentTrail.get(0).size() + 1 == existingTrail.get(0).size()) {
+                            ArrayList<ArrayList<String>> appendToExistingTrail = copyAndCreateNewListAndAddStringToEachList(parentTrail, front);
+                            existingTrail.addAll(appendToExistingTrail);
+                        }
+
+                        if (existingTrail == null) {
+                            trailMap.put(succ, copyAndCreateNewListAndAddStringToEachList(parentTrail, front));
+                        }
+                    }
+                }
+            }
+
+            if (trailMap.containsKey(end)) {
+                return copyAndCreateNewListAndAddStringToEachList(trailMap.get(end), end);
+            }
+            return new ArrayList<>();
+        }
+
+        private  ArrayList<ArrayList<String>> copyAndCreateNewListAndAddStringToEachList(ArrayList<ArrayList<String>> source, String front) {
+            ArrayList<ArrayList<String>> newList = new ArrayList<>(source.size());
+            for (ArrayList<String> list: source) {
+                ArrayList<String> subList = new ArrayList<>(list.size());
+                for (String s: list) {
+                    subList.add(s);
+                }
+                subList.add(front);
+                newList.add(subList);
+            }
+            return newList;
+        }
+    }
+
+    /**
      * https://www.interviewbit.com/problems/remove-duplicates-from-sorted-array/
      * Remove duplicates from Sorted Array
      * Given a sorted array, remove the duplicates in place such that each element appears only once and return the new length.
@@ -1499,6 +1730,131 @@ public class InterviewBit {
             newInterval.start = Math.min(a.start, b.start);
             newInterval.end = Math.max(a.end, b.end);
             return newInterval;
+        }
+    }
+
+    /**
+     * https://www.interviewbit.com/problems/allocate-books/
+     * N number of books are given.
+     * The ith book has Pi number of pages.
+     * You have to allocate books to M number of students so that maximum number of pages alloted to a student is minimum. A book will be allocated to exactly one student. Each student has to be allocated at least one book. Allotment should be in contiguous order, for example: A student cannot be allocated book 1 and book 3, skipping book 2.
+     *
+     * NOTE: Return -1 if a valid assignment is not possible
+     *
+     * Input:
+     *
+     * List of Books
+     * M number of students
+     * Your function should return an integer corresponding to the minimum number.
+     *
+     * Example:
+     *
+     * P : [12, 34, 67, 90]
+     * M : 2
+     *
+     * Output : 113
+     *
+     * There are 2 number of students. Books can be distributed in following fashion :
+     *   1) [12] and [34, 67, 90]
+     *       Max number of pages is allocated to student 2 with 34 + 67 + 90 = 191 pages
+     *   2) [12, 34] and [67, 90]
+     *       Max number of pages is allocated to student 2 with 67 + 90 = 157 pages
+     *   3) [12, 34, 67] and [90]
+     *       Max number of pages is allocated to student 1 with 12 + 34 + 67 = 113 pages
+     *
+     * Of the 3 cases, Option 3 has the minimum pages = 113.
+     */
+    public static class AllocateBooks {
+        public int books(ArrayList<Integer> books, int students) {
+
+            if (students > books.size()) {
+                return -1;
+            }
+
+            int lo = 0, hi = 0;
+            for (int page: books) {
+                hi += page;
+                lo = Math.max(lo, page);
+            }
+
+            while (lo < hi) {
+                int mid = lo + (hi-lo)/2;
+                if (isPossible(books, mid, students)) {
+                    hi = mid;
+                } else {
+                    lo = mid+1;
+                }
+            }
+            return lo;
+        }
+
+        private boolean isPossible(List<Integer> books, int k, int students) {
+            int reqStudents = 1;
+            int totalPages = 0;
+            for (int book: books) {
+                totalPages += book;
+                if (totalPages > k) {
+                    totalPages = book;
+                    reqStudents++;
+                }
+            }
+            return reqStudents <= students;
+        }
+    }
+
+    /**
+     * https://www.interviewbit.com/problems/search-for-a-range/
+     * Given a sorted array of integers, find the starting and ending position of a given target value.
+     *
+     * Your algorithm’s runtime complexity must be in the order of O(log n).
+     *
+     * If the target is not found in the array, return [-1, -1].
+     *
+     * Example:
+     *
+     * Given [5, 7, 7, 8, 8, 10]
+     *
+     * and target value 8,
+     *
+     * return [3, 4].
+     */
+    public static class SearchForRange {
+        public ArrayList<Integer> searchRange(final List<Integer> list, int b) {
+            ArrayList<Integer> result = new ArrayList<>();
+            if (!list.contains(b)) {
+                result.add(-1);
+                result.add(-1);
+                return result;
+            }
+            result.add(lowerIndex(list, b));
+            result.add(upperIndex(list, b));
+            return result;
+        }
+
+        private int lowerIndex(List<Integer> list, int val) {
+            int lo = 0, hi = list.size()-1;
+            while (lo < hi) {
+                int mid = lo + (hi-lo)/2;
+                if (list.get(mid) >= val) {
+                    hi = mid;
+                } else {
+                    lo = mid+1;
+                }
+            }
+            return lo;
+        }
+
+        private int upperIndex(List<Integer> list, int val) {
+            int lo = 0, hi = list.size()-1;
+            while (lo < hi) {
+                int mid = lo + (hi-lo)/2;
+                if (list.get(mid) > val) {
+                    hi = mid;
+                } else {
+                    lo = mid+1;
+                }
+            }
+            return lo < list.size() && list.get(lo) == val ? lo : lo -1;
         }
     }
 
