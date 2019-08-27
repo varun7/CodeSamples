@@ -4592,4 +4592,152 @@ public class LeetCodeProblems {
             return newList;
         }
     }
+
+
+    /**
+     * https://leetcode.com/problems/max-chunks-to-make-sorted/
+     * Given an array arr that is a permutation of [0, 1, ..., arr.length - 1], we split the array into some number of
+     * "chunks" (partitions), and individually sort each chunk.  After concatenating them, the result equals the sorted array.
+     *
+     * What is the most number of chunks we could have made?
+     *
+     * Example 1:
+     *
+     * Input: arr = [4,3,2,1,0]
+     * Output: 1
+     * Explanation:
+     * Splitting into two or more chunks will not return the required result.
+     * For example, splitting into [4, 3], [2, 1, 0] will result in [3, 4, 0, 1, 2], which isn't sorted.
+     * Example 2:
+     *
+     * Input: arr = [1,0,2,3,4]
+     * Output: 4
+     * Explanation:
+     * We can split into two chunks, such as [1, 0], [2, 3, 4].
+     * However, splitting into [1, 0], [2], [3], [4] is the highest number of chunks possible.
+     */
+    static class MaxChunksToMakeItSorted {
+        public int maxChunksToSorted(int[] arr) {
+            int end = 0, w=0;
+            for (int i=0; i<arr.length; i++) {
+                end = Math.max(end, arr[i]);
+                if (i >= end) {
+                    w++;
+                }
+            }
+            return w;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/max-chunks-to-make-sorted-ii/
+     * Given an array arr of integers (not necessarily distinct), we split the array into some number of "chunks"
+     * (partitions), and individually sort each chunk.  After concatenating them, the result equals the sorted array.
+     *
+     * What is the most number of chunks we could have made?
+     *
+     * Example 1:
+     *
+     * Input: arr = [5,4,3,2,1]
+     * Output: 1
+     * Explanation:
+     * Splitting into two or more chunks will not return the required result.
+     * For example, splitting into [5, 4], [3, 2, 1] will result in [4, 5, 1, 2, 3], which isn't sorted.
+     * Example 2:
+     *
+     * Input: arr = [2,1,3,4,4]
+     * Output: 4
+     * Explanation:
+     * We can split into two chunks, such as [2, 1], [3, 4, 4].
+     * However, splitting into [2, 1], [3], [4], [4] is the highest number of chunks possible.
+     */
+    static class MaxChunksToMakeItSortedII {
+        public int maxChunksToSorted(int[] arr) {
+            Map<Integer, List<Integer>> positionMap = createPositionMap(arr);
+            int end = Integer.MIN_VALUE, correctPos, w = 0;
+            for (int i=0; i<arr.length; i++) {
+                List<Integer> indexList = positionMap.get(arr[i]);
+                correctPos = indexList.get(0);
+                indexList.remove(0);
+                end = Math.max(end, correctPos);
+                if (i >= end) {
+                    w++;
+                    end = Integer.MIN_VALUE;
+                }
+            }
+            return w;
+        }
+
+        private Map<Integer, List<Integer>> createPositionMap(int[] arr) {
+            int[] sortedArr = Arrays.copyOf(arr, arr.length);
+            Arrays.sort(sortedArr);
+
+            Map<Integer, List<Integer>> positionMap = new HashMap<>();
+            for (int i=0; i<sortedArr.length; i++) {
+                List<Integer> indexes = positionMap.getOrDefault(sortedArr[i], new ArrayList<>());
+                indexes.add(i);
+                positionMap.put(sortedArr[i], indexes);
+            }
+            return positionMap;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/task-scheduler/
+     * Given a char array representing tasks CPU need to do. It contains capital letters A to Z where different letters
+     * represent different tasks. Tasks could be done without original order. Each task could be done in one interval.
+     * For each interval, CPU could finish one task or just be idle.
+     *
+     * However, there is a non-negative cooling interval n that means between two same tasks, there must be at least n
+     * intervals that CPU are doing different tasks or just be idle.
+     *
+     * You need to return the least number of intervals the CPU will take to finish all the given tasks.
+     *
+     * Example:
+     * Input: tasks = ["A","A","A","B","B","B"], n = 2
+     * Output: 8
+     * Explanation: A -> B -> idle -> A -> B -> idle -> A -> B.
+     *
+     *
+     * Note:
+     * The number of tasks is in the range [1, 10000].
+     * The integer n is in the range [0, 100].
+     */
+    static class TaskScheduler {
+
+        public int leastInterval(char[] tasks, int n) {
+            Map<Character, Integer> map = new HashMap<>();
+            for (char ch: tasks) {
+                map.put(ch, map.getOrDefault(ch, 0)+1);
+            }
+
+            PriorityQueue<Integer> queue = new PriorityQueue<>(Collections.reverseOrder());
+            queue.addAll(map.values());
+
+            int intervals = 0;
+            List<Integer> removedPair = new ArrayList<>();
+            while (!queue.isEmpty()) {
+                removedPair.clear();
+
+                int i=0;
+                while (i<=n && !queue.isEmpty()) {
+                    intervals++; i++;
+                    Integer max = queue.poll();
+                    if (max > 1) {
+                        removedPair.add(max-1);
+                    }
+                }
+
+                while (i<=n && !removedPair.isEmpty()) {
+                    intervals++;
+                    i++;
+                }
+
+                queue.addAll(removedPair);
+            }
+            return intervals;
+        }
+    }
 }
