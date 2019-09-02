@@ -937,14 +937,19 @@ public class InterviewBit {
         ArrayList<Integer> result;
 
         /**
-         * We rewrite our problem as given N cut points(and you cannot make first and last cut), decide order of these cuts to minimise the cost. So, we insert 0 and N at beginning and end of vector B. Now, we have solve our new problem with respect to this new array(say A).
+         * We rewrite our problem as given N cut points(and you cannot make first and last cut), decide order of these
+         * cuts to minimise the cost. So, we insert 0 and N at beginning and end of vector B. Now, we have solve
+         * our new problem with respect to this new array(say A).
          *
-         * We define dp(i, j) as minimum cost for making cuts Ai, Ai+1, …, Aj. Note that you are not making cuts Ai and Aj, but they decide the cost for us.
+         * We define dp(i, j) as minimum cost for making cuts Ai, Ai+1, …, Aj. Note that you are not making cuts Ai and Aj,
+         * but they decide the cost for us.
          *
-         * For solving dp(i, j), we iterate k from i+1 to j-1, assuming that the first cut we make in this interval is Ak. The total cost required(if we make first cut at Ak) is Aj - Ai + dp(i, k) + dp(k, j).
+         * For solving dp(i, j), we iterate k from i+1 to j-1, assuming that the first cut we make in this interval is Ak.
+         * The total cost required(if we make first cut at Ak) is Aj - Ai + dp(i, k) + dp(k, j).
          *
          * This is our solution. We can implement this DP recursively with memoisation. Total complexity will be O(N3).
-         * For actually building the solution, after calculating dp(i, j), we can store the index k which gave the minimum cost and then we can build the solution backwards.
+         * For actually building the solution, after calculating dp(i, j), we can store the index k which gave the minimum
+         * cost and then we can build the solution backwards.
          */
         public ArrayList<Integer> rodCut(int length, ArrayList<Integer> cuts) {
             result = new ArrayList<>();
@@ -973,6 +978,21 @@ public class InterviewBit {
                     }
                 }
             }
+
+
+            // Above for-loop can also be written as below.
+//            for (int len = 2; len < dp.length; len++) {
+//                for (int i=0, j = i + len; j < dp.length; j++, i++) {
+//
+//                    for (int k=i+1; k <j; k++) {
+//                        long cutCost = dp[i][k] + dp[k][j] + rod[j] - rod[i];
+//                        if (dp[i][j] == 0 || cutCost < dp[i][j]) {
+//                            dp[i][j] = cutCost;
+//                            footPrint[i][j] = k;
+//                        }
+//                    }
+//                }
+//            }
 
             backTrack(0, dp.length-1);
             return result;
@@ -1737,7 +1757,9 @@ public class InterviewBit {
      * https://www.interviewbit.com/problems/allocate-books/
      * N number of books are given.
      * The ith book has Pi number of pages.
-     * You have to allocate books to M number of students so that maximum number of pages alloted to a student is minimum. A book will be allocated to exactly one student. Each student has to be allocated at least one book. Allotment should be in contiguous order, for example: A student cannot be allocated book 1 and book 3, skipping book 2.
+     * You have to allocate books to M number of students so that maximum number of pages alloted to a student is minimum.
+     * A book will be allocated to exactly one student. Each student has to be allocated at least one book.
+     * Allotment should be in contiguous order, for example: A student cannot be allocated book 1 and book 3, skipping book 2.
      *
      * NOTE: Return -1 if a valid assignment is not possible
      *

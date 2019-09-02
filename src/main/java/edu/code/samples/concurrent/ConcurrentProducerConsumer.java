@@ -12,66 +12,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ConcurrentProducerConsumer {
 
-    public static class ThreadProducer implements Producer<Integer>, Runnable {
-
-        private Broker<Integer> broker;
-
-        public ThreadProducer(Broker<Integer> broker) {
-            this.broker = broker;
-        }
-
-        @Override
-        public Integer produce() {
-            Random random = new Random(System.currentTimeMillis());
-            int rand = random.nextInt();
-            System.out.println("[Producer] Generated number = " + rand);
-            return rand;
-        }
-
-        @Override
-        public void run() {
-            for (int i=0; i<10; i++) {
-                broker.put(produce());
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    System.out.println("[Producer] Recieved interrupt, breaking.");
-                    break;
-                }
-            }
-            System.out.println("[Producer] Done producing, existing after this one.");
-            broker.put(-1);
-        }
-    }
-
-    public static class ThreadConsumer implements Consumer<Integer>, Runnable {
-
-        private Broker<Integer> broker;
-
-        public ThreadConsumer(Broker<Integer> broker) {
-            this.broker = broker;
-        }
-
-        @Override
-        public void consume(Integer data) {
-            System.out.println("[Consumer] Consumed int = " + data);
-        }
-
-        @Override
-        public void run() {
-            Random random = new Random();
-            for (int i=broker.take(); i != -1; i = broker.take()) {
-                consume(i);
-                try {
-                    Thread.sleep(random.nextInt(5000));
-                } catch (InterruptedException e) {
-                    System.out.println("[Consumer] Received interrupt, breaking.");
-                    break;
-                }
-            }
-        }
-    }
-
     public static class UniDataBroker implements Broker<Integer> {
 
         private Integer local;

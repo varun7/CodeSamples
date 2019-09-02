@@ -1315,8 +1315,6 @@ public class LeetCodeProblems {
      */
     static class BurstBalloons {
         public int maxCoins(int[] coins) {
-//            int [][] dp = new int[coins.length][coins.length];
-//            return maxCoinsTopDown(dp, coins, 0, coins.length-1);
             if (coins.length == 0) {
                 return 0;
             }
@@ -2314,7 +2312,6 @@ public class LeetCodeProblems {
 
 
     /**
-     *
      * Given an unsorted integer array, find the smallest missing positive integer.
      *
      * Example 1:
@@ -4739,5 +4736,620 @@ public class LeetCodeProblems {
             }
             return intervals;
         }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/distinct-subsequences/
+     * Given a string S and a string T, count the number of distinct subsequences of S which equals T.
+     *
+     * A subsequence of a string is a new string which is formed from the original string by deleting some (can be none)
+     * of the characters without disturbing the relative positions of the remaining characters. (ie, "ACE" is a subsequence
+     * of "ABCDE" while "AEC" is not).
+     *
+     * Example 1:
+     *
+     * Input: S = "rabbbit", T = "rabbit"
+     * Output: 3
+     * Explanation:
+     *
+     * As shown below, there are 3 ways you can generate "rabbit" from S.
+     * (The caret symbol ^ means the chosen letters)
+     *
+     * rabbbit
+     * ^^^^ ^^
+     * rabbbit
+     * ^^ ^^^^
+     * rabbbit
+     * ^^^ ^^^
+     */
+    static class DistinctSubsequences {
+        public int numDistinct(String str, String text) {
+            int[][] dp = new int[text.length()+1][str.length()+1];
+            Arrays.fill(dp[0], 1);
+
+            for (int t=1; t<dp.length; t++) {
+                for (int s=1; s<dp[0].length; s++) {
+                    char tCh = text.charAt(t-1);
+                    char sCh = str.charAt(s-1);
+
+                    dp[t][s] = dp[t][s-1];
+                    dp[t][s] += tCh == sCh ? dp[t-1][s-1] : 0;
+                }
+            }
+            return dp[dp.length-1][dp[0].length-1];
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/palindrome-partitioning-ii/
+     * Given a string s, partition s such that every substring of the partition is a palindrome.
+     *
+     * Return the minimum cuts needed for a palindrome partitioning of s.
+     *
+     * Example:
+     *
+     * Input: "aab"
+     * Output: 1
+     * Explanation: The palindrome partitioning ["aa","b"] could be produced using 1 cut.
+     */
+    static class PalindromePartitioningII {
+        public int minCut(String s) {
+            int[] dp = new int[s.length()];
+            dp[0] = 0;
+            for (int i=1; i<dp.length; i++) {
+                int min = dp[i-1] + 1;
+                for (int j=i-1; j >=0; j--) {
+                    if (isPalindrome(s, j, i)) {
+                        int val = j == 0 ? 0 : dp[j-1] + 1;
+                        min = Math.min(min, val);
+                    }
+                    dp[i] = min;
+                }
+            }
+            return dp[dp.length-1];
+        }
+
+        private boolean isPalindrome(String str, int i, int j) {
+            while (i<j) {
+                if (str.charAt(i) != str.charAt(j)) {
+                    return false;
+                }
+                i++; j--;
+            }
+            return true;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/candy/
+     * There are N children standing in a line. Each child is assigned a rating value.
+     *
+     * You are giving candies to these children subjected to the following requirements:
+     *
+     * Each child must have at least one candy.
+     * Children with a higher rating get more candies than their neighbors.
+     * What is the minimum candies you must give?
+     *
+     * Example 1:
+     *
+     * Input: [1,0,2]
+     * Output: 5
+     * Explanation: You can allocate to the first, second and third child with 2, 1, 2 candies respectively.
+     * Example 2:
+     *
+     * Input: [1,2,2]
+     * Output: 4
+     * Explanation: You can allocate to the first, second and third child with 1, 2, 1 candies respectively.
+     *              The third child gets 1 candy because it satisfies the above two conditions.
+     */
+    static class Candy {
+        public int candy(int[] ratings) {
+            int count[] = new int[ratings.length];
+            Arrays.fill(count, 1);
+
+            for (int i=1; i < ratings.length; i++) {
+                if (ratings[i] > ratings[i-1]) {
+                    count[i] = count[i -1] + 1;
+                }
+            }
+
+            for (int i=ratings.length-2; i >= 0; i--) {
+                if (ratings[i] > ratings[i+1]) {
+                    count[i] = Math.max(count[i], count[i+1] + 1);
+                }
+            }
+
+            int result = 0;
+            for (int i=0; i<count.length; i++) {
+                result += count[i];
+            }
+            return result;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/word-search-ii/
+     * Given a 2D board and a list of words from the dictionary, find all words in the board.
+     *
+     * Each word must be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those
+     * horizontally or vertically neighboring. The same letter cell may not be used more than once in a word.
+     *
+     *
+     *
+     * Example:
+     *
+     * Input:
+     * board = [
+     *   ['o','a','a','n'],
+     *   ['e','t','a','e'],
+     *   ['i','h','k','r'],
+     *   ['i','f','l','v']
+     * ]
+     * words = ["oath","pea","eat","rain"]
+     *
+     * Output: ["eat","oath"]
+     *
+     *
+     * Note:
+     *
+     * All inputs are consist of lowercase letters a-z.
+     * The values of words are distinct.
+     */
+    static class WordSearchII {
+
+        static class Trie {
+
+            static class Node {
+                Node[] children;
+                char ch;
+                boolean word;
+
+                public Node(char ch, boolean word) {
+                    children = new Node[26];
+                    this.ch = ch;
+                    this.word = word;
+                }
+            }
+
+            private Node root = new Node('#', false);
+
+            public void add(String word) {
+                Node ptr = root;
+                for (char ch: word.toCharArray()) {
+                    int index = ch - 'a';
+                    if (ptr.children[index] == null) {
+                        ptr.children[index] = new Node(ch, false);
+                    }
+                    ptr = ptr.children[index];
+                }
+                ptr.word = true;
+            }
+
+            public boolean isWord(String word) {
+                Node ptr = find(word);
+                if (ptr == null) {
+                    return false;
+                }
+                return ptr.word;
+            }
+
+            public boolean containsPrefix(String prefix) {
+                return find(prefix) != null;
+            }
+
+            private Node find(String word) {
+                Node ptr = root;
+                for (char ch: word.toCharArray()) {
+                    int index = ch - 'a';
+                    if (index < 0 || ptr.children[index] == null) {
+                        return null;
+                    }
+                    ptr = ptr.children[index];
+                }
+                return ptr;
+            }
+        }
+
+        private Trie trie;
+        private int[][] moves = {{1,0}, {-1,0}, {0,1}, {0, -1}};
+
+
+        public List<String> findWords(char[][] board, String[] words) {
+            trie = new Trie();
+            for (String w: words) {
+                trie.add(w);
+            }
+
+            Set<String> result = new HashSet<>();
+            for (int i=0; i<board.length; i++) {
+                for (int j=0; j<board[0].length; j++) {
+                    findWords(board, i, j, "" + board[i][j], result);
+                }
+            }
+            return new ArrayList<>(result);
+        }
+
+        void findWords(char[][] board, int i, int j, String prefix, Set<String> result) {
+            if (i < 0 || i >= board.length || j < 0 || j >= board[0].length) {
+                return;
+            }
+
+            if (trie.isWord(prefix)) {
+                result.add(prefix);
+            }
+
+            for (int move=0; move <4; move++) {
+                int newI = i + moves[move][0];
+                int newJ = j + moves[move][1];
+                if (canMove(board, prefix, newI, newJ)) {
+                    char temp = board[i][j];
+                    board[i][j] = '*';
+                    findWords(board, newI, newJ, prefix + board[newI][newJ], result);
+                    board[i][j] = temp;
+                }
+            }
+        }
+
+        boolean canMove(char[][] board, String prefix, int i, int j) {
+            if (i < 0 || j < 0 || i >= board.length || j >= board[0].length) {
+                return false;
+            }
+            return trie.containsPrefix(prefix + board[i][j]);
+        }
+
+    }
+
+
+    /**
+     * https://leetcode.com/problems/concatenated-words/
+     * Given a list of words (without duplicates), please write a program that returns all concatenated words in the given list of words.
+     * A concatenated word is defined as a string that is comprised entirely of at least two shorter words in the given array.
+     *
+     * Example:
+     * Input: ["cat","cats","catsdogcats","dog","dogcatsdog","hippopotamuses","rat","ratcatdogcat"]
+     *
+     * Output: ["catsdogcats","dogcatsdog","ratcatdogcat"]
+     *
+     * Explanation: "catsdogcats" can be concatenated by "cats", "dog" and "cats";
+     *  "dogcatsdog" can be concatenated by "dog", "cats" and "dog";
+     * "ratcatdogcat" can be concatenated by "rat", "cat", "dog" and "cat".
+     * Note:
+     * The number of elements of the given array will not exceed 10,000
+     * The length sum of elements in the given array will not exceed 600,000.
+     * All the input string will only include lower case letters.
+     * The returned elements order does not matter.
+     */
+    static class ConcatenatedWords {
+
+        class Trie {
+            class Node {
+                Node[] children;
+                char ch;
+                boolean word;
+
+                public Node(char ch, boolean word) {
+                    children = new Node[26];
+                    this.ch = ch;
+                    this.word = word;
+                }
+            }
+
+            private Node root = new Node('#', false);
+
+            public void add(String word) {
+                Node ptr = root;
+                for (char ch: word.toCharArray()) {
+                    int index = ch - 'a';
+                    if (ptr.children[index] == null) {
+                        ptr.children[index] = new Node(ch, false);
+                    }
+                    ptr = ptr.children[index];
+                }
+                ptr.word = true;
+            }
+
+            public boolean isWord(String word) {
+                Node ptr = find(word);
+                if (ptr == null) {
+                    return false;
+                }
+                return ptr.word;
+            }
+
+            public boolean containsPrefix(String prefix) {
+                return find(prefix) != null;
+            }
+
+            private Node find(String word) {
+                Node ptr = root;
+                for (char ch: word.toCharArray()) {
+                    int index = ch - 'a';
+                    if (index < 0 || ptr.children[index] == null) {
+                        return null;
+                    }
+                    ptr = ptr.children[index];
+                }
+                return ptr;
+            }
+        }
+
+        private Comparator<String> comp = (a, b) -> Integer.compare(a.length(), b.length());
+        private Set<String> cache;
+        private Trie trie;
+
+        public List<String> findAllConcatenatedWordsInADict(String[] words) {
+            trie = new Trie();
+            cache = new HashSet<>();
+
+            Arrays.sort(words, comp);
+            List<String> result = new ArrayList<>();
+
+            for (String w: words) {
+                if (search(w)) {
+                    result.add(w);
+                }
+                trie.add(w);
+            }
+            return result;
+        }
+
+        public boolean search(String word) {
+            if (trie.isWord(word) || cache.contains(word)) {
+                return true;
+            }
+
+            for (int i=0; i<word.length(); i++) {
+                String subWord = word.substring(0, i+1);
+                if (!trie.containsPrefix(subWord)) {
+                    return false;
+                }
+
+                if (trie.isWord(subWord) && search(word.substring(i+1))) {
+                    cache.add(word.substring(i+1));
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/frog-jump/
+     * A frog is crossing a river. The river is divided into x units and at each unit there may or may not exist a stone.
+     * The frog can jump on a stone, but it must not jump into the water.
+     *
+     * Given a list of stones' positions (in units) in sorted ascending order, determine if the frog is able to cross
+     * the river by landing on the last stone. Initially, the frog is on the first stone and assume the first jump must be 1 unit.
+     *
+     * If the frog's last jump was k units, then its next jump must be either k - 1, k, or k + 1 units. Note that the
+     * frog can only jump in the forward direction.
+     *
+     * Note:
+     *
+     * The number of stones is ≥ 2 and is < 1,100.
+     * Each stone's position will be a non-negative integer < 231.
+     * The first stone's position is always 0.
+     * Example 1:
+     *
+     * [0,1,3,5,6,8,12,17]
+     *
+     * There are a total of 8 stones.
+     * The first stone at the 0th unit, second stone at the 1st unit,
+     * third stone at the 3rd unit, and so on...
+     * The last stone at the 17th unit.
+     *
+     * Return true. The frog can jump to the last stone by jumping
+     * 1 unit to the 2nd stone, then 2 units to the 3rd stone, then
+     * 2 units to the 4th stone, then 3 units to the 6th stone,
+     * 4 units to the 7th stone, and 5 units to the 8th stone.
+     * Example 2:
+     *
+     * [0,1,2,3,4,8,9,11]
+     *
+     * Return false. There is no way to jump to the last stone as
+     * the gap between the 5th and 6th stone is too large.
+     */
+    static class FrogJump {
+        public boolean canCross(int[] stones) {
+            if (stones.length == 0) {
+                return true;
+            }
+
+            if (stones.length == 2) {
+                return stones[1] == 1;
+            }
+
+            Set<Integer> numbers = new HashSet<>();
+            for (int s: stones) {
+                numbers.add(s);
+            }
+
+            return _canCross(stones, stones[stones.length-1], 1, 1, numbers, new HashSet<String>());
+        }
+
+        private boolean _canCross(int[] stones, int target, int val, int k, Set<Integer> numbers, Set<String> cache) {
+
+            if (val == target) {
+                return true;
+            }
+
+            if (!numbers.contains(val) || val > target || k == 0) {
+                return false;
+            }
+
+            String cacheValue = val + " " + k;
+            if (cache.contains(cacheValue)) {
+                return false;
+            }
+            cache.add(cacheValue);
+
+            return  _canCross(stones, target, val + k-1, k-1, numbers, cache) ||
+                    _canCross(stones, target, val + k, k, numbers, cache) ||
+                    _canCross(stones, target, val + k + 1, k + 1, numbers, cache);
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists/
+     * You have k lists of sorted integers in ascending order. Find the smallest range that includes at least one number
+     * from each of the k lists.
+     *
+     * We define the range [a,b] is smaller than range [c,d] if b-a < d-c or a < c if b-a == d-c.
+     *
+     *
+     *
+     * Example 1:
+     *
+     * Input: [[4,10,15,24,26], [0,9,12,20], [5,18,22,30]]
+     * Output: [20,24]
+     * Explanation:
+     * List 1: [4, 10, 15, 24,26], 24 is in range [20,24].
+     * List 2: [0, 9, 12, 20], 20 is in range [20,24].
+     * List 3: [5, 18, 22, 30], 22 is in range [20,24].
+     *
+     *
+     * Note:
+     *
+     * The given list may contain duplicates, so ascending order means >= here.
+     * 1 <= k <= 3500
+     * -105 <= value of elements <= 105.
+     */
+    static class SmallestRangeCoveringElementsFromKLists {
+
+        class Node {
+            int item;
+            int listIndex;
+            int itemIndex;
+
+            public Node(int i, int lIndex, int iIndex) {
+                this.item = i;
+                this.listIndex = lIndex;
+                this.itemIndex = iIndex;
+            }
+        }
+
+        private Comparator<Node> comparator = (a, b) -> Integer.compare(a.item, b.item);
+
+        public int[] smallestRange(List<List<Integer>> nums) {
+            // Create Priority Queue
+            PriorityQueue<Node> queue = new PriorityQueue<>(comparator);
+            int max = Integer.MIN_VALUE;
+
+            // Initialize Priority Queue
+            for (int i=0; i < nums.size(); i++) {
+                int val = nums.get(i).get(0);
+                max = Math.max(max, val);
+                queue.offer(new Node(val, i, 0));
+            }
+
+            // Find the smallest range with all elements.
+            int min = Integer.MAX_VALUE, start = 0, end = 0;
+            do  {
+                Node minNode = queue.poll();
+                if (max - minNode.item < min) {
+                    min = max - minNode.item;
+                    start = minNode.item;
+                    end = max;
+                }
+
+                if (nums.get(minNode.listIndex).size() - 1 != minNode.itemIndex) {
+                    minNode.itemIndex++;
+                    minNode.item = nums.get(minNode.listIndex).get(minNode.itemIndex);
+                    max = Math.max(max, minNode.item);
+                    queue.offer(minNode);
+                }
+            } while (queue.size() >= nums.size());
+
+            return new int[] {start, end};
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/insert-delete-getrandom-o1-duplicates-allowed/
+     * Design a data structure that supports all following operations in average O(1) time.
+     *
+     * Note: Duplicate elements are allowed.
+     * insert(val): Inserts an item val to the collection.
+     * remove(val): Removes an item val from the collection if present.
+     * getRandom: Returns a random element from current collection of elements. The probability of each element being
+     *   returned is linearly related to the number of same value the collection contains.
+     */
+    static class RandomizedCollection {
+
+        private Map<Integer, Set<Integer>> map;
+        private List<Integer> list;
+        private Random random;
+
+        /** Initialize your data structure here. */
+        public RandomizedCollection() {
+            map = new HashMap<>();
+            list = new ArrayList<>();
+            random = new Random();
+        }
+
+        /** Inserts a value to the collection. Returns true if the collection did not already contain the specified element. */
+        public boolean insert(int val) {
+            boolean flag = true;
+            if (map.containsKey(val)) {
+                flag = false;
+            }
+
+            int index = list.size();
+            list.add(val);
+            Set<Integer> elementIndexes = map.getOrDefault(val, new HashSet<>());
+            elementIndexes.add(index);
+            map.put(val, elementIndexes);
+            return flag;
+        }
+
+        /** Removes a value from the collection. Returns true if the collection contained the specified element. */
+        public boolean remove(int val) {
+            // When the key is not present in the data structure.
+            if (!map.containsKey(val)) {
+                return false;
+            }
+
+            // Find index of deleted element
+            Set<Integer> removeIndexesSet = map.get(val);
+            int removeIndex = removeIndexesSet.stream().findFirst().get();
+            removeIndexesSet.remove(removeIndex);
+
+            // If the set of indexes become empty then remove the item from map
+            if (removeIndexesSet.isEmpty()) {
+                map.remove(val);
+            }
+
+
+            // Update position of last element.
+            int lastItem = list.get(list.size()-1);
+            list.set(removeIndex, lastItem);
+
+            // Update indexes of last element in the map. If check is required for the cases
+            // when the element deleted earlier was present at the last index previously, we cannot delete it twice.
+            if (map.containsKey(lastItem)) {
+                Set<Integer> lastItemIndexes = map.get(lastItem);
+                lastItemIndexes.add(removeIndex);
+                lastItemIndexes.remove(list.size()-1);
+            }
+
+            // Delete last index from the list.
+            list.remove(list.size()-1);
+
+            return true;
+        }
+
+
+        /** Get a random element from the collection. */
+        public int getRandom() {
+            return list.get(random.nextInt(list.size()));
+        }
+
     }
 }

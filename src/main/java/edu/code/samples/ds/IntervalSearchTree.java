@@ -52,7 +52,7 @@ public class IntervalSearchTree{
 
     public List<IntervalNode> overlappingIntervals(int lo, int hi) {
         List<IntervalNode> intervals = new ArrayList<>();
-        _overlappingIntervals(root, lo, hi, intervals);
+        _overlappingIntervals(this.root, lo, hi, intervals);
         return intervals;
     }
 
@@ -70,12 +70,8 @@ public class IntervalSearchTree{
             intervals.add(root);
         }
 
-        if (lo <= root.low && root.max >= root.low) {
-            _overlappingIntervals(root.left, lo, hi, intervals);
-        } else {
-            _overlappingIntervals(root.right, lo, hi, intervals);
-        }
-
+        _overlappingIntervals(root.left, lo, hi, intervals);
+        _overlappingIntervals(root.right, lo, hi, intervals);
     }
 
     private boolean doOverlap(int lo, int hi, IntervalNode root) {

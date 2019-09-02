@@ -1,5 +1,7 @@
 import edu.code.samples.bits.BitsQuestions;
 import edu.code.samples.concurrent.ConcurrentProducerConsumer;
+import edu.code.samples.concurrent.Consumer;
+import edu.code.samples.concurrent.Producer;
 import edu.code.samples.dp.Knapsack;
 import edu.code.samples.dp.MatrixPath;
 import edu.code.samples.dp.Sequences;
@@ -21,7 +23,6 @@ import edu.code.samples.kafka.WordCount;
 import edu.code.samples.sort.Sort;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static edu.code.samples.generic.Utils.createRandomIntArray;
@@ -50,7 +51,7 @@ public class Main {
 //        binaryIndexedTreeDemo();
 //        intervalSearchTreeDemo();
 //        demoInversionPair();
-        demoPrefixTree();
+//        demoPrefixTree();
 //        test();
 //        demoConcurrentProducerConsumer();
 //        kafkaDemo();
@@ -474,17 +475,17 @@ public class Main {
 
     private static void demoConcurrentProducerConsumer() {
         ConcurrentProducerConsumer.UniDataBroker broker = new ConcurrentProducerConsumer.UniDataBroker();
-        new Thread(new ConcurrentProducerConsumer.ThreadProducer(broker)).start();
-        new Thread(new ConcurrentProducerConsumer.ThreadConsumer(broker)).start();
+        new Thread(new Producer.ThreadProducer(broker)).start();
+        new Thread(new Consumer.ThreadConsumer(broker)).start();
 
         System.out.println("\n\n Queue based producer and consumer");
         ConcurrentProducerConsumer.QueueBroker queueBroker = new ConcurrentProducerConsumer.QueueBroker(3);
-        new Thread(new ConcurrentProducerConsumer.ThreadProducer(queueBroker)).start();
-        new Thread(new ConcurrentProducerConsumer.ThreadConsumer(queueBroker)).start();
+        new Thread(new Producer.ThreadProducer(queueBroker)).start();
+        new Thread(new Consumer.ThreadConsumer(queueBroker)).start();
 
         System.out.println("\n\n Lock based producer and consumer");
         ConcurrentProducerConsumer.LockBasedBroker lockBasedBroker = new ConcurrentProducerConsumer.LockBasedBroker();
-        new Thread(new ConcurrentProducerConsumer.ThreadProducer(lockBasedBroker)).start();
-        new Thread(new ConcurrentProducerConsumer.ThreadConsumer(lockBasedBroker)).start();
+        new Thread(new Producer.ThreadProducer(lockBasedBroker)).start();
+        new Thread(new Consumer.ThreadConsumer(lockBasedBroker)).start();
     }
 }

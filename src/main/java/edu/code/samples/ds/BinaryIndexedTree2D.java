@@ -17,8 +17,8 @@ public class BinaryIndexedTree2D {
     }
 
     public void update(int xIndex, int yIndex, int val) {
-        for (int x=xIndex +1; x < rows; x += (x & -x)) {
-            for (int y = yIndex + 1; y < cols; y += (y & -y)) {
+        for (int x=xIndex; x < rows; x += (x & -x)) {
+            for (int y = yIndex; y < cols; y += (y & -y)) {
                 tree[x][y] += val;
             }
         }
@@ -35,17 +35,10 @@ public class BinaryIndexedTree2D {
     }
 
     private void constructTree() {
-        // Initialize all elements to zero.
-        for (int i=0; i < rows; i++) {
-            for (int j=0; j < cols; j++) {
-                tree[i][j] = 0;
-            }
-        }
-
         // Iterate each element and add it to tree.
         for (int i=0; i < input.length; i++) {
             for (int j=0; j<input[0].length; j++) {
-                update(i,j,input[i][j]);
+                update(i+1,j+1,input[i][j]);
             }
         }
     }
