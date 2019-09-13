@@ -52,7 +52,7 @@ public class Sort {
     }
 
     private static int randomPivotSelect(int [] array, int left, int right) {
-        Random random = new Random();
+        Random random = new Random(System.currentTimeMillis());
         int pivotIndex = Math.abs(random.nextInt() % (right - left + 1)) + left;
 
         for (int i= pivotIndex-1; i >= left; i--) {
@@ -166,6 +166,16 @@ public class Sort {
             return _findKthSmallestElement(array, absolutePartitionIndex + 1, right, k);
         } else {
             return _findKthSmallestElement(array, left, absolutePartitionIndex - 1, k);
+        }
+    }
+
+    public void insertionSort(int[] array) {
+        for (int i=0; i<array.length; i++) {
+            int val = array[i], j = i-1;
+            for (; i>=0 && val < array[j]; j--) {
+                array[j+1] = array[i];
+            }
+            array[j+1] = val;
         }
     }
 

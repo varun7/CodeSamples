@@ -387,7 +387,7 @@ public class Main {
         int[] noMajorityElementArray = {-1, -2, -2, -1, -2, -10, -2, -10, -7};
         System.out.println("\n\nMajority element in the array (" + Integer.MIN_VALUE + " if none present) = " + Algorithms.majorityElement(noMajorityElementArray));
 
-        String text = "varun sharma", pattern = "arn";
+        String text = "AAABAABAACAA", pattern = "AABAAC";
         System.out.println("\n\n" + text + " contains " + pattern + " = " + KMP.contains(text, pattern));
     }
 

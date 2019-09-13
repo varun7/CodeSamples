@@ -320,6 +320,22 @@ public interface Tree {
             return left != null? left : right;
         }
 
+        public boolean isValidBST(Node root) {
+            return isBst(root, Long.MIN_VALUE, Long.MAX_VALUE);
+        }
+
+        private boolean isBst(Node root, long start, long end) {
+            if (root == null) {
+                return true;
+            }
+
+            if (root.data <= start || root.data >= end) {
+                return false;
+            }
+
+            return isBst(root.left, start, root.data) && isBst(root.right, root.data, end);
+        }
+
         private boolean rootToLeafPath(Node root, int sum) {
             if (root == null) {
                 return false;

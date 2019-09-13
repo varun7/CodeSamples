@@ -256,7 +256,8 @@ public class LeetCodeProblems {
      * https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/
      * Say you have an array for which the ith element is the price of a given stock on day i.
      *
-     * Design an algorithm to find the maximum profit. You may complete as many transactions as you like (i.e., buy one and sell one share of the stock multiple times).
+     * Design an algorithm to find the maximum profit. You may complete as many transactions as you like
+     * (i.e., buy one and sell one share of the stock multiple times).
      *
      * Note: You may not engage in multiple transactions at the same time (i.e., you must sell the stock before you buy again).
      *
@@ -1048,7 +1049,7 @@ public class LeetCodeProblems {
      * <p>
      * Explanation: The array can be partitioned as [1, 5, 5] and [11].
      */
-    static class PartitionEqualSum {
+    static class PartitionEqualSubsetSum {
 
         /**
          * Question can be converted to find subset of array with sum = total sum of array /2.
@@ -1273,9 +1274,7 @@ public class LeetCodeProblems {
             if (envelopes.length == 0) {
                 return 0;
             }
-            Arrays.sort(envelopes, (int[] a, int[] b) -> {
-                return Integer.compare(a[0], b[0]);
-            });
+            Arrays.sort(envelopes, (a,b) -> Integer.compare(a[0], b[0]));
 
             int[] dp = new int[envelopes.length];
             int max = 0;
@@ -2369,7 +2368,8 @@ public class LeetCodeProblems {
 
     /**
      * https://leetcode.com/problems/largest-rectangle-in-histogram/submissions/
-     * Given n non-negative integers representing the histogram's bar height where the width of each bar is 1, find the area of largest rectangle in the histogram.
+     * Given n non-negative integers representing the histogram's bar height where the width of each bar is 1,
+     * find the area of largest rectangle in the histogram.
      *
      * Above is a histogram where width of each bar is 1, given height = [2,1,5,6,2,3].
      *
@@ -5351,5 +5351,1343 @@ public class LeetCodeProblems {
             return list.get(random.nextInt(list.size()));
         }
 
+    }
+
+
+    /**
+     * https://leetcode.com/problems/strange-printer/
+     * There is a strange printer with the following two special requirements:
+     *
+     * The printer can only print a sequence of the same character each time.
+     * At each turn, the printer can print new characters starting from and ending at any places, and will cover the
+     * original existing characters.
+     * Given a string consists of lower English letters only, your job is to count the minimum number of turns the
+     * printer needed in order to print it.
+     *
+     * Example 1:
+     * Input: "aaabbb"
+     * Output: 2
+     * Explanation: Print "aaa" first and then print "bbb".
+     * Example 2:
+     * Input: "aba"
+     * Output: 2
+     * Explanation: Print "aaa" first and then print "b" from the second place of the string, which will cover the existing character 'a'.
+     */
+    static class StrangePrinter {
+
+        int[][] cache;
+
+        public int strangePrinter(String s) {
+            if (s.length() < 2) {
+                return s.length();
+            }
+
+            cache = new int[s.length()][s.length()];
+
+            // Compress the original string "aaaabbb" becomes "ab"
+            StringBuilder builder = new StringBuilder();
+            for (int i=0; i<s.length(); ) {
+                builder.append(s.charAt(i));
+                int j = i+1;
+                while (j < s.length() && s.charAt(j) == s.charAt(i)) {
+                    j++;
+                }
+                i = j;
+            }
+            String compactString = builder.toString();
+            // return minimumPrints(compactString, 0, compactString.length()-1);
+            return bottomupMinimumPrints(compactString);
+        }
+
+        /**
+         * For each character at the end of the string, lets consider 2 cases:
+         *
+         * 1. It was simply inserted with the cost of 1
+         * 2. It was free from some previous step to the left that printed this character already (we can print extra
+         * character all the way till the end)
+         *
+         * Consider string CABBA. Last character could be simply inserted after a string CABB with the cost of 1 or it
+         * could be free since there is an A character to the left and we could simply print extra As all the way till
+         * the end: CAAAA we just need to consider the cost of building string CA (same as CAAAA) and BB, in other words,
+         * split remaining string into CA | BB | A
+         */
+        private int minimumPrints(String str, int i, int j) {
+            if (i >= j) {
+                return i > j ? 0 : 1;
+            }
+
+            if (cache[i][j] != 0) {
+                return cache[i][j];
+            }
+
+            int cost = 1 + minimumPrints(str, i, j-1);
+            for (int k=i; k < j; k++) {
+                if (str.charAt(j) == str.charAt(k)) {
+                    cost = Math.min(cost, minimumPrints(str, i, k) + minimumPrints(str, k+1, j-1));
+                }
+            }
+            cache[i][j] = cost;
+            return cost;
+        }
+
+        private int bottomupMinimumPrints(String str) {
+            int[][] dp = new int[str.length()][str.length()];
+
+            for (int i=0; i<dp.length; i++) {
+                dp[i][i] = 1;
+            }
+
+            for (int len =1; len < dp.length; len++) {
+                for (int i=0, j=i+len; j < dp.length; i++, j++) {
+                    dp[i][j] = 1 + dp[i][j-1];
+                    for (int k=i; k < j; k++) {
+                        if (str.charAt(k) == str.charAt(j)) {
+                            dp[i][j] = Math.min(dp[i][j], dp[i][k] + dp[k+1][j-1]);
+                        }
+                    }
+                }
+            }
+            return dp[0][dp.length-1];
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/cut-off-trees-for-golf-event/
+     * You are asked to cut off trees in a forest for a golf event. The forest is represented as a non-negative 2D map, in this map:
+     *
+     *     0 represents the obstacle can't be reached.
+     *     1 represents the ground can be walked through.
+     *     The place with number bigger than 1 represents a tree can be walked through, and this positive number represents
+     *     the tree's height.
+     *
+     *
+     *
+     * You are asked to cut off all the trees in this forest in the order of tree's height - always cut off the tree
+     * with lowest height first. And after cutting, the original place has the tree will become a grass (value 1).
+     *
+     * You will start from the point (0, 0) and you should output the minimum steps you need to walk to cut off all the trees.
+     * If you can't cut off all the trees, output -1 in that situation.
+     *
+     * You are guaranteed that no two trees have the same height and there is at least one tree needs to be cut off.
+     *
+     * Example 1:
+     *
+     * Input:
+     * [
+     *  [1,2,3],
+     *  [0,0,4],
+     *  [7,6,5]
+     * ]
+     * Output: 6
+     *
+     *
+     *
+     * Example 2:
+     *
+     * Input:
+     * [
+     *  [1,2,3],
+     *  [0,0,0],
+     *  [7,6,5]
+     * ]
+     * Output: -1
+     *
+     *
+     *
+     * Example 3:
+     *
+     * Input:
+     * [
+     *  [2,3,4],
+     *  [0,0,5],
+     *  [8,7,6]
+     * ]
+     * Output: 6
+     * Explanation: You started from the point (0,0) and you can cut off the tree in (0,0) directly without walking.
+     */
+    static class CutOffTreesForGolfEvent {
+
+        class Item {
+            int val, xPos, yPos;
+            public Item(int v, int x, int y) {val = v; xPos = x; yPos = y;}
+        }
+
+        int[][] moves = {{-1, 0}, {1,0}, {0,-1}, {0,1}};
+        Comparator<Item> compartor = (a,b) -> Integer.compare(a.val, b.val);
+
+        public int cutOffTree(List<List<Integer>> forest) {
+
+            PriorityQueue<Item> queue = new PriorityQueue<>(compartor);
+
+            // Create Matrix and initialize Priority Queue
+            int[][] matrix = new int[forest.size()][forest.get(0).size()];
+            for (int i=0; i<forest.size(); i++) {
+                for (int j=0; j<forest.get(i).size(); j++) {
+                    matrix[i][j] = forest.get(i).get(j);
+                    if (matrix[i][j] > 1) {
+                        queue.offer(new Item(matrix[i][j], i, j));
+                    }
+                }
+            }
+
+            int curX = 0, curY = 0, steps = 0;
+            while (!queue.isEmpty()) {
+                Item next = queue.poll();
+
+                // int distance = dfs(matrix, curX, curY, next.xPos, next.yPos);
+                int distance = bfs(matrix, curX, curY, next.xPos, next.yPos);
+                if (distance == -1) {return -1;}
+
+                steps += distance;
+                curX = next.xPos;
+                curY = next.yPos;
+            }
+            return steps;
+        }
+
+        private int dfs(int[][] matrix, int aX, int aY, int bX, int bY) {
+            if (aX == bX && aY == bY) {
+                return 0;
+            }
+
+            int nextX, nextY, minCost = Integer.MAX_VALUE;
+            for (int[] move: moves) {
+
+                nextX = aX + move[0];
+                nextY = aY + move[1];
+
+                if (isPossible(matrix, nextX, nextY)) {
+                    int temp = matrix[aX][aY];
+                    matrix[aX][aY] = 0;
+
+                    int cost = bfs(matrix, nextX, nextY, bX, bY) + 1;
+                    matrix[aX][aY] = temp;
+
+                    if (cost > 0) {
+                        minCost = Math.min(minCost, cost);
+                    }
+
+                }
+            }
+            return minCost == Integer.MAX_VALUE ? -1 : minCost;
+        }
+
+        private int bfs(int[][] matrix, int sx, int sy, int dx, int dy) {
+            if (sx == dx && sy == dy) {
+                return 0;
+            }
+            boolean visited[][] = new boolean[matrix.length][matrix[0].length];
+            Queue<int[]> queue = new ArrayDeque<>();
+            queue.offer(new int[]{sx, sy, 0});
+            visited[sx][sy] = true;
+
+            while (!queue.isEmpty()) {
+                int[] current = queue.poll();
+
+                if (current[0] == dx && current[1] == dy) {
+                    return current[2];
+                }
+
+                for (int[] move: moves) {
+                    int neighborX = current[0] + move[0];
+                    int neighborY = current[1] + move[1];
+                    int cost = current[2] + 1;
+
+                    if (!isPossible(matrix, neighborX, neighborY) || visited[neighborX][neighborY]) {
+                        continue;
+                    }
+
+                    queue.offer(new int[] {neighborX, neighborY, cost});
+                    visited[neighborX][neighborY] = true;
+                }
+            }
+            return -1;
+        }
+
+        private boolean isPossible(int[][] matrix, int i, int j) {
+            if (i >= matrix.length || j >= matrix[0].length || i < 0 || j < 0 || matrix[i][j] == 0) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/prefix-and-suffix-search/
+     * Given many words, words[i] has weight i.
+     *
+     * Design a class WordFilter that supports one function, WordFilter.f(String prefix, String suffix). It will return
+     * the word with given prefix and suffix with maximum weight. If no word exists, return -1.
+     *
+     * Examples:
+     *
+     * Input:
+     * WordFilter(["apple"])
+     * WordFilter.f("a", "e") // returns 0
+     * WordFilter.f("b", "") // returns -1
+     *
+     *
+     * Note:
+     *
+     * words has length in range [1, 15000].
+     * For each test case, up to words.length queries WordFilter.f may be made.
+     * words[i] has length in range [1, 10].
+     * prefix, suffix have lengths in range [0, 10].
+     * words[i] and prefix, suffix queries consist of lowercase letters only.
+     */
+    static class WordFilter {
+
+        class Trie {
+            private class Node {
+                Node[] children;
+                char ch;
+                boolean word;
+                int max;
+
+                public Node(char ch, boolean word) {
+                    children = new Node[27];
+                    this.ch = ch;
+                    this.word = word;
+                    this.max = -1;
+                }
+            }
+
+            private Node root = new Node('#', false);
+
+            public void add(String word, int i) {
+                Node ptr = root;
+                for (char ch: word.toCharArray()) {
+                    int index = ch - 'a';
+                    if (ptr.children[index] == null) {
+                        ptr.children[index] = new Node(ch, false);
+                    }
+                    ptr = ptr.children[index];
+                }
+                ptr.word = true;
+                ptr.max = Math.max(ptr.max, i);
+            }
+
+            private int count(String prefix) {
+                Node ptr = find(prefix);
+                return ptr == null ? -1 : ptr.max;
+            }
+
+            private Node find(String word) {
+                Node ptr = root;
+                for (char ch: word.toCharArray()) {
+                    int index = ch - 'a';
+                    if (ptr.children[index] == null) {
+                        return null;
+                    }
+                    ptr = ptr.children[index];
+                }
+                return ptr;
+            }
+        }
+
+        // Using this as delimeter as it follows z in ascii code.
+        private char DELIMETER = '{';
+        private Trie trie;
+
+        public WordFilter(String[] words) {
+            trie = new Trie();
+            for (int wIndex = 0; wIndex < words.length; wIndex++) {
+                String w = words[wIndex];
+
+                for (int i=0; i<= w.length(); i++) {
+                    String prefix = w.substring(0, i);
+
+                    for (int j=w.length(); j >=0 ; j--) {
+                        String suffix = w.substring(j);
+                        trie.add(prefix + DELIMETER + suffix, wIndex);
+                    }
+                }
+            }
+        }
+
+        public int f(String prefix, String suffix) {
+            return trie.count(prefix + DELIMETER + suffix);
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/car-fleet/
+     * N cars are going to the same destination along a one lane road.  The destination is target miles away.
+     *
+     * Each car i has a constant speed speed[i] (in miles per hour), and initial position position[i] miles towards the target along the road.
+     *
+     * A car can never pass another car ahead of it, but it can catch up to it, and drive bumper to bumper at the same speed.
+     *
+     * The distance between these two cars is ignored - they are assumed to have the same position.
+     *
+     * A car fleet is some non-empty set of cars driving at the same position and same speed.  Note that a single car is also a car fleet.
+     *
+     * If a car catches up to a car fleet right at the destination point, it will still be considered as one car fleet.
+     *
+     *
+     * How many car fleets will arrive at the destination?
+     *
+     *
+     *
+     * Example 1:
+     *
+     * Input: target = 12, position = [10,8,0,5,3], speed = [2,4,1,1,3]
+     * Output: 3
+     * Explanation:
+     * The cars starting at 10 and 8 become a fleet, meeting each other at 12.
+     * The car starting at 0 doesn't catch up to any other car, so it is a fleet by itself.
+     * The cars starting at 5 and 3 become a fleet, meeting each other at 6.
+     * Note that no other cars meet these fleets before the destination, so the answer is 3.
+     */
+    static class CarFleet {
+
+        private int SPEED = 0;
+        private int DIST = 1;
+
+        private Comparator<int[]> comparator = (a,b) -> Integer.compare(a[DIST], b[DIST]);
+
+        public int carFleet(int target, int[] position, int[] speed) {
+
+            if (position.length == 0 || position.length == 1) {
+                return position.length;
+            }
+
+            int[][] speedDistance = new int[position.length][2];
+            for (int i=0; i<speedDistance.length; i++) {
+                speedDistance[i][SPEED] = speed[i];
+                speedDistance[i][DIST] = target - position[i];
+            }
+
+            Arrays.sort(speedDistance, comparator);
+            double[] time = new double[position.length];
+            for (int i=0; i<time.length; i++) {
+                time[i] = (double) speedDistance[i][DIST] / speedDistance[i][SPEED];
+            }
+
+            double prev = time[0];
+            int fleet = 0;
+            for (int i=0; i<time.length; ) {
+                int j = i+1;
+                while (j < time.length && time[j] <= prev) {
+                    j++;
+                }
+                fleet++;
+
+                i = j;
+                if (i < time.length) {
+                    prev = time[i];
+                }
+            }
+            return fleet;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/swap-nodes-in-pairs/
+     * Given a linked list, swap every two adjacent nodes and return its head.
+     * You may not modify the values in the list's nodes, only nodes itself may be changed.
+     *
+     * Example:
+     * Given 1->2->3->4, you should return the list as 2->1->4->3.
+     */
+    static class SwapNodesInPair {
+
+        class ListNode {
+            int val;
+            ListNode next;
+            public ListNode(int v) {this.val = v;}
+        }
+
+        public ListNode swapPairs(ListNode head) {
+            if (head == null || head.next == null) {
+                return head;
+            }
+
+            ListNode p = null, q = head, r = null;
+            head = q.next;
+
+            while (q != null && q.next != null) {
+                r = q.next;
+                if (p != null) {
+                    p.next = r;
+                }
+                q.next = r.next;
+                r.next = q;
+                p = q;
+                q = q.next;
+            }
+            return head;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/largest-divisible-subset/
+     * Given a set of distinct positive integers, find the largest subset such that every pair (Si, Sj) of elements in this subset satisfies:
+     *
+     * Si % Sj = 0 or Sj % Si = 0.
+     *
+     * If there are multiple solutions, return any subset is fine.
+     *
+     * Example 1:
+     *
+     * Input: [1,2,3]
+     * Output: [1,2] (of course, [1,3] will also be ok)
+     * Example 2:
+     *
+     * Input: [1,2,4,8]
+     * Output: [1,2,4,8]
+     */
+    static class LargestDivisibleSubset {
+        public List<Integer> largestDivisibleSubset(int[] nums) {
+            if (nums.length == 0) {
+                return Collections.emptyList();
+            }
+
+            Arrays.sort(nums);
+            int maxIndex = 0;
+            List<Integer>[] dp = new List[nums.length];
+
+            for (int i=0; i<nums.length; i++) {
+                dp[i] = new ArrayList<>();
+                int size =0, max = -1;
+                for (int j=i-1; j>=0; j--) {
+                    if (nums[i] % nums[j] == 0 && dp[j].size() > size) {
+                        size = dp[j].size();
+                        max = j;
+                    }
+                }
+
+                if (max != -1) {
+                    dp[i].addAll(dp[max]);
+                }
+                dp[i].add(nums[i]);
+                maxIndex = dp[maxIndex].size() > dp[i].size() ? maxIndex : i;
+            }
+            return dp[maxIndex];
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/maximal-square/
+     * Given a 2D binary matrix filled with 0's and 1's, find the largest square containing only 1's and return its area.
+     *
+     * Example:
+     *
+     * Input:
+     *
+     * 1 0 1 0 0
+     * 1 0 1 1 1
+     * 1 1 1 1 1
+     * 1 0 0 1 0
+     *
+     * Output: 4
+     */
+    static class MaximalSquare {
+        public int maximalSquare(char[][] matrix) {
+            if (matrix.length == 0) {
+                return 0;
+            }
+
+            int[][] dp = new int[matrix.length][matrix[0].length];
+            int max = 0;
+            for (int i=0; i<dp.length; i++) {
+                for (int j=0; j<dp[0].length; j++) {
+                    if (matrix[i][j] == '0') {
+                        continue;
+                    }
+                    if (i==0 || j == 0) {
+                        dp[i][j] = 1;
+                    } else {
+                        dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1;
+                    }
+                    max = Math.max(dp[i][j], max);
+                }
+            }
+            return max * max;
+        }
+
+        private int min(int a, int b, int c) {
+            int min = Math.min(a,b);
+            return Math.min(min, c);
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/target-sum/
+     * You are given a list of non-negative integers, a1, a2, ..., an, and a target, S. Now you have 2 symbols + and -.
+     * For each integer, you should choose one from + and - as its new symbol.
+     *
+     * Find out how many ways to assign symbols to make sum of integers equal to target S.
+     *
+     * Example 1:
+     * Input: nums is [1, 1, 1, 1, 1], S is 3.
+     * Output: 5
+     * Explanation:
+     *
+     * -1+1+1+1+1 = 3
+     * +1-1+1+1+1 = 3
+     * +1+1-1+1+1 = 3
+     * +1+1+1-1+1 = 3
+     * +1+1+1+1-1 = 3
+     *
+     * There are 5 ways to assign symbols to make the sum of nums be target 3.
+     * Note:
+     * The length of the given array is positive and will not exceed 20.
+     * The sum of elements in the given array will not exceed 1000.
+     * Your output answer is guaranteed to be fitted in a 32-bit integer.
+     */
+    static class TargetSum {
+
+        Map<Integer, Integer> cache = null;
+
+        public int findTargetSumWays(int[] nums, int S) {
+            cache = new HashMap<>();
+            return memoizedSumWays(nums, 0, S, 0);
+        }
+
+        private int recursiveSumWays(int[] nums, int index, int target, int sum) {
+            if (index == nums.length) {
+                return sum == target ? 1 : 0;
+            }
+
+            int add = recursiveSumWays(nums, index+1, target, sum + nums[index]);
+            int subtract = recursiveSumWays(nums, index+1, target, sum - nums[index]);
+            return add + subtract;
+        }
+
+        private int memoizedSumWays(int[] nums, int index, int target, int sum) {
+            if (cache.containsKey(sum)) {
+                return cache.get(sum);
+            }
+
+            if (index == nums.length) {
+                return sum == target ? 1 : 0;
+            }
+
+            int ways = 0;
+            ways += recursiveSumWays(nums, index+1, target, sum + nums[index]);
+            ways += recursiveSumWays(nums, index+1, target, sum - nums[index]);
+            cache.put(sum, ways);
+            return ways;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/minimum-cost-for-tickets/
+     * In a country popular for train travel, you have planned some train travelling one year in advance.
+     * The days of the year that you will travel is given as an array days.  Each day is an integer from 1 to 365.
+     *
+     * Train tickets are sold in 3 different ways:
+     *
+     * a 1-day pass is sold for costs[0] dollars;
+     * a 7-day pass is sold for costs[1] dollars;
+     * a 30-day pass is sold for costs[2] dollars.
+     * The passes allow that many days of consecutive travel.  For example, if we get a 7-day pass on day 2,
+     * then we can travel for 7 days: day 2, 3, 4, 5, 6, 7, and 8.
+     *
+     * Return the minimum number of dollars you need to travel every day in the given list of days.
+     *
+     *
+     *
+     * Example 1:
+     *
+     * Input: days = [1,4,6,7,8,20], costs = [2,7,15]
+     * Output: 11
+     * Explanation:
+     * For example, here is one way to buy passes that lets you travel your travel plan:
+     * On day 1, you bought a 1-day pass for costs[0] = $2, which covered day 1.
+     * On day 3, you bought a 7-day pass for costs[1] = $7, which covered days 3, 4, ..., 9.
+     * On day 20, you bought a 1-day pass for costs[0] = $2, which covered day 20.
+     * In total you spent $11 and covered all the days of your travel.
+     * Example 2:
+     *
+     * Input: days = [1,2,3,4,5,6,7,8,9,10,30,31], costs = [2,7,15]
+     * Output: 17
+     * Explanation:
+     * For example, here is one way to buy passes that lets you travel your travel plan:
+     * On day 1, you bought a 30-day pass for costs[2] = $15 which covered days 1, 2, ..., 30.
+     * On day 31, you bought a 1-day pass for costs[0] = $2 which covered day 31.
+     * In total you spent $17 and covered all the days of your travel.
+     */
+    static class MinimumCostForTickets {
+        public int mincostTickets(int[] days, int[] costs) {
+
+            if (days.length == 0) {
+                return 0;
+            }
+
+            int[] dp = new int[days.length];
+            dp[0] = minimum(costs[0], costs[1], costs[2]);
+            for (int i=1; i<dp.length; i++) {
+                int oneDayCost = costs[0] + dp[i-1];
+                int sevenDayCost = costForDays(dp, days, i, costs[1], 7);
+                int thirtyDayCost = costForDays(dp, days, i, costs[2], 30);
+                dp[i] = minimum(oneDayCost, sevenDayCost, thirtyDayCost);
+            }
+
+            return dp[dp.length-1];
+        }
+
+        public int costForDays(int[] dp, int[] days, int i, int cost, int validity) {
+            int j = i-1;
+            while (j >=0 && days[i] - days[j] < validity) {
+                j--;
+            }
+            return j < 0 ? cost : dp[j] + cost;
+        }
+
+        private int minimum(int a, int b, int c) {
+            int min = Math.min(a,b);
+            return Math.min(min, c);
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/combination-sum-iv/
+     * Given an integer array with all positive numbers and no duplicates, find the number of possible combinations that
+     * add up to a positive integer target.
+     *
+     * Example:
+     *
+     * nums = [1, 2, 3]
+     * target = 4
+     *
+     * The possible combination ways are:
+     * (1, 1, 1, 1)
+     * (1, 1, 2)
+     * (1, 2, 1)
+     * (1, 3)
+     * (2, 1, 1)
+     * (2, 2)
+     * (3, 1)
+     *
+     * Note that different sequences are counted as different combinations.
+     *
+     * Therefore the output is 7.
+     *
+     *
+     * Follow up:
+     * What if negative numbers are allowed in the given array?
+     * How does it change the problem?
+     * What limitation we need to add to the question to allow negative numbers?
+     */
+    static class CombinationSum {
+        public int combinationSum4(int[] nums, int target) {
+            int[] dp = new int[target+1];
+            // Arrays.fill(dp, -1);
+            // return memoizationSolution(nums, dp, target, 0);
+            return tabulatedSolution(nums, dp, target);
+        }
+
+        private int tabulatedSolution(int[] nums, int[] dp, int target) {
+            dp[0] = 1;
+            for (int i=1; i< dp.length; i++) {
+                for (int j=0; j < nums.length; j++) {
+                    if (i - nums[j] >= 0) {
+                        dp[i] += dp[i-nums[j]];
+                    }
+                }
+            }
+            return dp[target];
+        }
+
+        private int memoizationSolution(int[] nums, int[] dp, int target, int sum) {
+            if (sum > target) {
+                return 0;
+            }
+
+            if (sum == target) {
+                return 1;
+            }
+
+            if (dp[sum] != -1) {
+                return dp[sum];
+            }
+
+            int count = 0;
+            for (int n : nums) {
+                count += memoizationSolution(nums, dp, target, sum + n);
+            }
+            dp[sum] = count;
+            return count;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/house-robber-ii/
+     * You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed.
+     * All houses at this place are arranged in a circle. That means the first house is the neighbor of the last one.
+     * Meanwhile, adjacent houses have security system connected and it will automatically contact the police if two
+     * adjacent houses were broken into on the same night.
+     *
+     * Given a list of non-negative integers representing the amount of money of each house, determine the maximum amount o
+     * f money you can rob tonight without alerting the police.
+     *
+     * Example 1:
+     *
+     * Input: [2,3,2]
+     * Output: 3
+     * Explanation: You cannot rob house 1 (money = 2) and then rob house 3 (money = 2),
+     *              because they are adjacent houses.
+     * Example 2:
+     *
+     * Input: [1,2,3,1]
+     * Output: 4
+     * Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3).
+     *              Total amount you can rob = 1 + 3 = 4.
+     */
+    static class HouseRobberII {
+
+        public int rob(int[] cost) {
+            if (cost.length == 0) {
+                return 0;
+            } else if (cost.length == 1) {
+                return cost[0];
+            } else if (cost.length == 2) {
+                return Math.max(cost[0], cost[1]);
+            }
+            return Math.max(maxSum(cost, 0, cost.length-1), maxSum(cost, 1, cost.length));
+        }
+
+        private int maxSum(int[] cost, int start, int end) {
+            int[] dp = new int[cost.length];
+            dp[start] = cost[start];
+            dp[start+1] = Math.max(cost[start], cost[start+1]);
+            for (int i=start+2; i < dp.length; i++) {
+                dp[i] = Math.max(dp[i-1], dp[i-2] + cost[i]);
+            }
+            return dp[end-1];
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/subsets-ii/
+     * Given a collection of integers that might contain duplicates, nums, return all possible subsets (the power set).
+     *
+     * Note: The solution set must not contain duplicate subsets.
+     *
+     * Example:
+     *
+     * Input: [1,2,2]
+     * Output:
+     * [
+     *   [2],
+     *   [1],
+     *   [1,2,2],
+     *   [2,2],
+     *   [1,2],
+     *   []
+     * ]
+     */
+    static class SubsetsII {
+        public List<List<Integer>> subsetsWithDup(int[] nums) {
+            List<List<Integer>> result = new ArrayList<>();
+            if (nums.length == 0) {
+                return result;
+            }
+            Set<String> sets = new HashSet<>();
+            recursiveSets(sets, "", nums, 0);
+            for (String s: sets) {
+                result.add(convertToList(s));
+            }
+            return result;
+        }
+
+
+        private void recursiveSets(Set<String> set, String str, int[] nums, int index) {
+            set.add(sortedString(str));
+            if (index >= nums.length) {
+                return;
+            }
+            recursiveSets(set, str, nums, index+1);
+            recursiveSets(set, str + "#" + nums[index], nums, index+1);
+        }
+
+        private List<Integer> convertToList(String s) {
+            String[] numbers = s.split("#");
+            List<Integer> output = new ArrayList<>();
+            for (String n: numbers) {
+                if (!n.isEmpty()) {
+                    output.add(Integer.valueOf(n));
+                }
+            }
+            return output;
+        }
+
+        private String sortedString(String str) {
+            String[] strings = str.split("#");
+            Arrays.sort(strings);
+            StringBuilder builder = new StringBuilder();
+            for (String s: strings) {
+                builder.append(s);
+            }
+            return builder.toString();
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/majority-element-ii/
+     * Given an integer array of size n, find all elements that appear more than ⌊ n/3 ⌋ times.
+     *
+     * Note: The algorithm should run in linear time and in O(1) space.
+     *
+     * Example 1:
+     *
+     * Input: [3,2,3]
+     * Output: [3]
+     * Example 2:
+     *
+     * Input: [1,1,1,3,3,2,2,2]
+     * Output: [1,2]
+     **/
+    static class MajorityElementII {
+        public List<Integer> majorityElement(int[] nums) {
+            List<Integer> result = new ArrayList<>();
+            if (nums.length == 0)  {
+                return result;
+            }
+
+            int a = nums[0], na = 1, b = Integer.MIN_VALUE, nb = 0;
+            for (int i=1; i<nums.length; i++) {
+                int n = nums[i];
+                if (a == n) {
+                    na++;
+                } else if (b == n) {
+                    nb++;
+                } else if (nb == 0) {
+                    nb = 1;
+                    b = n;
+                } else if (na == 0) {
+                    na = 1;
+                    a = n;
+                } else {
+                    na--;
+                    nb--;
+                }
+            }
+            if (isMajorityElement(nums, a)) {
+                result.add(a);
+            }
+
+            if (a != b && isMajorityElement(nums, b)) {
+                result.add(b);
+            }
+            return result;
+        }
+
+        private boolean isMajorityElement(int[] nums, int a) {
+            int count = 0;
+            for (int n: nums) {
+                if (a == n) {
+                    count++;
+                }
+            }
+            return count > nums.length/3;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/non-overlapping-intervals/
+     * Given a collection of intervals, find the minimum number of intervals you need to remove to make the rest of the
+     * intervals non-overlapping.
+     *
+     * Example 1:
+     *
+     * Input: [[1,2],[2,3],[3,4],[1,3]]
+     * Output: 1
+     * Explanation: [1,3] can be removed and the rest of intervals are non-overlapping.
+     * Example 2:
+     *
+     * Input: [[1,2],[1,2],[1,2]]
+     * Output: 2
+     * Explanation: You need to remove two [1,2] to make the rest of intervals non-overlapping.
+     * Example 3:
+     *
+     * Input: [[1,2],[2,3]]
+     * Output: 0
+     * Explanation: You don't need to remove any of the intervals since they're already non-overlapping.
+     *
+     *
+     * Note:
+     *
+     * You may assume the interval's end point is always bigger than its start point.
+     * Intervals like [1,2] and [2,3] have borders "touching" but they don't overlap each other.
+     */
+    static class NonOverlappingIntervals {
+
+        private Comparator<int[]> comp = (a,b) -> {
+            if (a[0] != b[0]) {
+                return Integer.compare(a[0], b[0]);
+            }
+            return Integer.compare(a[1], b[1]);
+        };
+        private int START = 0;
+        private int END = 1;
+
+        public int eraseOverlapIntervals(int[][] intervals) {
+            if (intervals.length < 2) {
+                return 0;
+            }
+            Arrays.sort(intervals, comp);
+            int end = intervals[0][1];
+            int count = 0;
+            for (int i=1; i<intervals.length; i++) {
+                if (intervals[i][START] < end) {
+                    // In case of overlap always keep the interval with lower end.
+                    count++;
+                    end = Math.min(intervals[i][END], end);
+                } else {
+                    end = Math.max(intervals[i][END], end);
+                }
+
+            }
+            return count;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/increasing-subsequences/
+     * Given an integer array, your task is to find all the different possible increasing subsequences of the given array,
+     * and the length of an increasing subsequence should be at least 2.
+     *
+     * Example:
+     * Input: [4, 6, 7, 7]
+     * Output: [[4, 6], [4, 7], [4, 6, 7], [4, 6, 7, 7], [6, 7], [6, 7, 7], [7,7], [4,7,7]]
+     *
+     * Note:
+     * The length of the given array will not exceed 15.
+     * The range of integer in the given array is [-100,100].
+     * The given array may contain duplicates, and two equal integers should also be considered as a special case of
+     * increasing sequence
+     */
+    static class IncreasingSubsequences {
+        public List<List<Integer>> findSubsequences(int[] nums) {
+            Set<List<Integer>> miniResult = new HashSet<>();
+            recursiveSequences(nums, 0, new ArrayList<>(), miniResult);
+            return new ArrayList<>(miniResult);
+        }
+
+        private void recursiveSequences(int[] nums, int index, List<Integer> active, Set<List<Integer>> result) {
+            if (active.size() > 1) {
+                result.add(new ArrayList<>(active));
+            }
+
+            for (int i=index; i<nums.length; i++) {
+                if (!active.isEmpty() && nums[i] < active.get(active.size()-1)) {
+                    continue;
+                }
+                active.add(nums[i]);
+                recursiveSequences(nums, i+1, active, result);
+                active.remove(active.size()-1);
+            }
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/maximum-length-of-pair-chain/
+     * You are given n pairs of numbers. In every pair, the first number is always smaller than the second number.
+     *
+     * Now, we define a pair (c, d) can follow another pair (a, b) if and only if b < c. Chain of pairs can be formed in
+     * this fashion.
+     *
+     * Given a set of pairs, find the length longest chain which can be formed. You needn't use up all the given pairs.
+     * You can select pairs in any order.
+     *
+     * Example 1:
+     * Input: [[1,2], [2,3], [3,4]]
+     * Output: 2
+     * Explanation: The longest chain is [1,2] -> [3,4]
+     */
+    static class MaximumLengthOfPairChain {
+
+        private Comparator<int[]> minComp = (a,b) -> {
+            if (a[0] != b[0]) {
+                return Integer.compare(a[0], b[0]);
+            }
+            return Integer.compare(a[1], b[1]);
+        };
+
+        public int findLongestChain(int[][] pairs) {
+            Arrays.sort(pairs, minComp);
+
+            int end = pairs[0][1];
+            int count = 1;
+            for (int i=1; i<pairs.length; i++) {
+                // do overlap
+                if (end >= pairs[i][0]) {
+                    end = Math.min(end, pairs[i][1]);
+                } else {
+                    count++;
+                    end = pairs[i][1];
+                }
+            }
+            return count;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/longest-word-in-dictionary-through-deleting/
+     * Given a string and a string dictionary, find the longest string in the dictionary that can be formed by deleting
+     * some characters of the given string. If there are more than one possible results, return the longest word with
+     * the smallest lexicographical order. If there is no possible result, return the empty string.
+     *
+     * Example 1:
+     * Input:
+     * s = "abpcplea", d = ["ale","apple","monkey","plea"]
+     *
+     * Output:
+     * "apple"
+     * Example 2:
+     * Input:
+     * s = "abpcplea", d = ["a","b","c"]
+     *
+     * Output:
+     * "a"
+     */
+    static class LongestWordInDictionaryThroughDeleting {
+
+        public String findLongestWord(String s, List<String> d) {
+            int maxWordSize = 0;
+            String result = "";
+            for (String word: d) {
+                if (isSubsequence(word, s)) {
+                    if (word.length() > result.length()) {
+                        result = word;
+                    } else if (word.length() == result.length()) {
+                        result = getLexSmallerString(word, result);
+                    }
+                }
+            }
+            return result;
+        }
+
+        private String getLexSmallerString(String a, String b) {
+            for (int i=0; i<a.length(); i++) {
+                if (a.charAt(i) == b.charAt(i)) {
+                    continue;
+                } else {
+                    return a.charAt(i) < b.charAt(i) ? a : b;
+                }
+            }
+            return a;
+        }
+
+        private boolean isSubsequence(String word, String str) {
+            int j = 0;
+            for (int i=0; i<str.length() && j <word.length(); i++) {
+                if (word.charAt(j) == str.charAt(i)) {
+                    j++;
+                }
+            }
+            return j >= word.length();
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/next-greater-element-ii/submissions/
+     * Given a circular array (the next element of the last element is the first element of the array), print the
+     * Next Greater Number for every element. The Next Greater Number of a number x is the first greater number to its
+     * \traversing-order next in the array, which means you could search circularly to find its next greater number.
+     * If it doesn't exist, output -1 for this number.
+     *
+     * Example 1:
+     * Input: [1,2,1]
+     * Output: [2,-1,2]
+     * Explanation: The first 1's next greater number is 2;
+     * The number 2 can't find next greater number;
+     * The second 1's next greater number needs to search circularly, which is also 2.
+     */
+    static class NextGreaterElementII {
+        public int[] nextGreaterElements(int[] nums) {
+
+            int[] result = new int[nums.length];
+            Stack<Integer> stack = new Stack<>();
+
+            // Go from right to left and find the maximum values
+            for (int i=nums.length-1; i>-1; i--) {
+                while (!stack.isEmpty() && nums[i] >= nums[stack.peek()]) {
+                    stack.pop();
+                }
+                result[i] = stack.isEmpty() ? Integer.MIN_VALUE : nums[stack.peek()];
+                stack.push(i);
+            }
+
+            // We can reuse the stack from previous iteration.
+            for (int i=nums.length-1; i>-1 ; i--) {
+                if (result[i] != Integer.MIN_VALUE) {
+                    continue;
+                }
+                while (!stack.isEmpty() && nums[i] >= nums[stack.peek()]) {
+                    stack.pop();
+                }
+                result[i] = stack.isEmpty() || i <= stack.peek() ? Integer.MIN_VALUE : nums[stack.peek()];
+            }
+
+            // Substitute all MIN_VALUE with -1.
+            for (int i=0; i<result.length; i++) {
+                if (result[i] == Integer.MIN_VALUE) {
+                    result[i] = -1;
+                }
+            }
+            return result;
+        }
+
+    }
+
+
+    /**
+     * https://leetcode.com/problems/maximum-sum-circular-subarray/
+     * Given a circular array C of integers represented by A, find the maximum possible sum of a non-empty subarray of C.
+     *
+     * Here, a circular array means the end of the array connects to the beginning of the array.  (Formally, C[i] = A[i]
+     * when 0 <= i < A.length, and C[i+A.length] = C[i] when i >= 0.)
+     *
+     * Also, a subarray may only include each element of the fixed buffer A at most once.  (Formally, for a subarray
+     * C[i], C[i+1], ..., C[j], there does not exist i <= k1, k2 <= j with k1 % A.length = k2 % A.length.)
+     *
+     *
+     *
+     * Example 1:
+     *
+     * Input: [1,-2,3,-2]
+     * Output: 3
+     * Explanation: Subarray [3] has maximum sum 3
+     * Example 2:
+     *
+     * Input: [5,-3,5]
+     * Output: 10
+     * Explanation: Subarray [5,5] has maximum sum 5 + 5 = 10
+     * Example 3:
+     *
+     * Input: [3,-1,2,-1]
+     * Output: 4
+     * Explanation: Subarray [2,-1,3] has maximum sum 2 + (-1) + 3 = 4
+     * Example 4:
+     *
+     * Input: [3,-2,2,-3]
+     * Output: 3
+     * Explanation: Subarray [3] and [3,-2,2] both have maximum sum 3
+     * Example 5:
+     *
+     * Input: [-2,-3,-1]
+     * Output: -1
+     * Explanation: Subarray [-1] has maximum sum -1
+     */
+    static class MaximumSumCircularSubArray {
+        public int maxSubarraySumCircular(int[] arr) {
+            int pSum = kadanesMaxSum(arr);
+            int totalSum = 0;
+            boolean isAllNonPositive = true;
+            for (int i=0; i<arr.length; i++) {
+                if (arr[i] > 0) {
+                    isAllNonPositive = false;
+                }
+                totalSum += arr[i];
+                arr[i] *= -1;
+            }
+
+            if (isAllNonPositive) {
+                return pSum;
+            }
+
+            int nSum = kadanesMaxSum(arr);
+
+            return pSum > totalSum + nSum ? pSum : totalSum + nSum;
+        }
+
+        private int kadanesMaxSum(int[] arr) {
+            int sum = 0, maxSum = 0, maxVal = Integer.MIN_VALUE;
+            for (int i=0; i<arr.length; i++) {
+                if (sum + arr[i] < 0) {
+                    sum = 0;
+                } else {
+                    sum += arr[i];
+                }
+                maxSum = Math.max(maxSum, sum);
+                maxVal = Math.max(maxVal, arr[i]);
+            }
+            // If sum is 0 then either 0 is the max value in the array or array is completely -ve.
+            // In either case pick the max value from the array
+            return maxSum == 0 ? maxVal : maxSum;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/fruit-into-baskets/
+     * In a row of trees, the i-th tree produces fruit with type tree[i].
+     *
+     * You start at any tree of your choice, then repeatedly perform the following steps:
+     *
+     * Add one piece of fruit from this tree to your baskets.  If you cannot, stop.
+     * Move to the next tree to the right of the current tree.  If there is no tree to the right, stop.
+     * Note that you do not have any choice after the initial choice of starting tree: you must perform step 1,
+     * then step 2, then back to step 1, then step 2, and so on until you stop.
+     *
+     * You have two baskets, and each basket can carry any quantity of fruit, but you want each basket to only carry one
+     * type of fruit each.
+     *
+     * What is the total amount of fruit you can collect with this procedure?
+     *
+     * Example 1:
+     *
+     * Input: [1,2,1]
+     * Output: 3
+     * Explanation: We can collect [1,2,1].
+     * Example 2:
+     *
+     * Input: [0,1,2,2]
+     * Output: 3
+     * Explanation: We can collect [1,2,2].
+     * If we started at the first tree, we would only collect [0, 1].
+     * Example 3:
+     *
+     * Input: [1,2,3,2,2]
+     * Output: 4
+     * Explanation: We can collect [2,3,2,2].
+     * If we started at the first tree, we would only collect [1, 2].
+     * Example 4:
+     *
+     * Input: [3,3,3,1,2,1,1,2,3,3,4]
+     * Output: 5
+     * Explanation: We can collect [1,2,1,1,2].
+     * If we started at the first tree or the eighth tree, we would only collect 4 fruits.
+     */
+    static class FruitIntoBaskets {
+        public int totalFruit(int[] tree) {
+            Map<Integer, Integer> countMap = new HashMap<>();
+            int maxFruits = 0;
+            for (int i=0, j=0; j < tree.length; j++) {
+                countMap.put(tree[j], countMap.getOrDefault(tree[j], 0) + 1);
+                while (countMap.size() > 2) {
+                    int c = countMap.get(tree[i]);
+                    if (c == 1) {
+                        countMap.remove(tree[i]);
+                    } else {
+                        countMap.put(tree[i], c-1);
+                    }
+                    i++;
+                }
+                maxFruits = Math.max(maxFruits, j - i + 1);
+            }
+            return maxFruits;
+        }
     }
 }
