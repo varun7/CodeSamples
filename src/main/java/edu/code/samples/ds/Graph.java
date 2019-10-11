@@ -1,21 +1,7 @@
 package edu.code.samples.ds;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
-import java.util.Stack;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public interface Graph<V> {
@@ -47,6 +33,8 @@ public interface Graph<V> {
     boolean dfs(V element);
 
     Map<V, Double> singleSourceShortestPathDijkstra(V source);
+
+    Map<V, Double> dijkstra(V source);
 
     void mstPrims();
 
@@ -414,6 +402,71 @@ public interface Graph<V> {
                             Double neighborDistance = distances.get(candidate) + this.edgeWeight(candidate, v);
                             if (distances.get(v) > neighborDistance) {
                                 distances.put(v, neighborDistance);
+                            }
+                        });
+
+            }
+            return distances;
+        }
+
+        private class Pair<T,U> {
+            private T first;
+            private U second;
+
+            public Pair(T first, U second) {
+                this.first = first;
+                this.second = second;
+            }
+
+            public T getFirst() {
+                return first;
+            }
+
+            public U getSecond() {
+                return second;
+            }
+
+            @Override
+            public int hashCode() {
+                return first.hashCode();
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return first.equals(((Pair) obj).getFirst());
+            }
+        }
+
+        @Override
+        public Map<V, Double> dijkstra(V source) {
+            final Double INF = Double.MAX_VALUE - 1;
+            Set<V> explored = new HashSet<>();
+
+            // Initializations.
+            Map<V, Double> distances = this.vertices().stream().collect(Collectors.toMap(v -> v, v-> INF));
+            distances.put(source, 0d);
+
+            // Treeset and TreeMap both are implemented on balanced binary search tree.
+            TreeSet<Pair<V, Double>> treeSet = new TreeSet<>((p, q) -> Double.compare(p.getSecond(), q.getSecond()));
+            this.vertices().stream().forEach(v -> treeSet.add(new Pair<>(v, INF)));
+            treeSet.add(new Pair<>(source, 0d));
+
+            // We will take one vertex from unexplored and move it to explored set.
+            while (!treeSet.isEmpty()) {
+
+                // Remove minimum distance vertex and mark it as explored.
+                Pair<V, Double> candidate = treeSet.pollFirst(); // Removes the first element from the tree, replacement of lowest function.
+                explored.add(candidate.getFirst());
+
+                // Revisit distance of all neighbors of candidate.
+                this.successors(candidate.getFirst())
+                        .stream()
+                        .filter(v -> !explored.contains(v))
+                        .forEach(v -> {
+                            Double neighborDistance = distances.get(candidate.getFirst()) + this.edgeWeight(candidate.getFirst(), v);
+                            if (distances.get(v) > neighborDistance) {
+                                distances.put(v, neighborDistance);
+                                treeSet.add(new Pair<>(v, neighborDistance));
                             }
                         });
 

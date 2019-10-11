@@ -4,32 +4,35 @@ public class KMP {
 
     public static boolean contains(String text, String pattern) {
         int [] kmp = preProcessing(pattern);
-        int i=0, j=0;
-        while (i < text.length()) {
-            if (text.charAt(i) == pattern.charAt(j)) {
-                i++; j++;
-                if (j == pattern.length()) {
-                    return true;
-                }
+        for (int t=0, p=0; t < text.length(); ) {
+            char tCh = text.charAt(t);
+            char pCh = pattern.charAt(p);
+
+            if (tCh == pCh) {
+                t++;
+                p++;
+            } else if (p == 0){
+                t++;
             } else {
-                if (j == 0) {
-                    i++;
-                } else {
-                    j = kmp[j];
-                }
+                p = kmp[p-1];
+            }
+
+            if (p == pattern.length()) {
+                return true;
             }
         }
         return false;
     }
 
     private static int[] preProcessing(String pattern) {
-        int [] kmp = new int[pattern.length()];
-        kmp [0] = 0;
-        int i = 1, len = 0;
-        while (i < pattern.length()) {
-            if (pattern.charAt(i) == pattern.charAt(len)) {
-                i++; len++;
-                kmp[i] = len;
+        int[] kmp = new int[pattern.length()];
+        kmp[0] = 0;
+        for (int i=1, len = 0; i<pattern.length(); ) {
+            char ch = pattern.charAt(i);
+            char pCh = pattern.charAt(len);
+            if (ch == pCh) {
+                len++;
+                kmp[i++] = len;
             } else {
                 if (len == 0) {
                     kmp[i++] = 0;

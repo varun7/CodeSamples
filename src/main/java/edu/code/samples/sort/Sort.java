@@ -26,14 +26,14 @@ public class Sort {
     }
 
     private static boolean isPresentInRightSubarray(int [] array, int low, int mid, int end, int element) {
+        // Right sub-array is sorted.
         if (array[mid] < array[end] && element >= array[mid] && element <= array[end]) {
-            // Right sub-array is sorted.
             return true;
-        } else {
-            // Left array is sorted, check if element is not present in that then it should be in right half.
-            if (!(element >= array[low] && element <= array[mid])) {
-                return true;
-            }
+        }
+
+        // Left array is sorted, check if element is not present in that then it should be in right half.
+        if (!(element >= array[low] && element <= array[mid])) {
+            return true;
         }
         return false;
     }

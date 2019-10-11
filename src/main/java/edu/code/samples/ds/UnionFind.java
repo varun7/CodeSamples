@@ -8,7 +8,7 @@ public interface UnionFind<V> {
     /**
      * Returns the name of the group input node is part of.
      */
-    Leader<V> find(V node);
+    V find(V node);
 
     /**
      * Fuse groups which x and y are part of.
@@ -31,9 +31,9 @@ public interface UnionFind<V> {
         }
 
         @Override
-        public Leader<V> find(V node) {
+        public V find(V node) {
     //            return _find(node);
-            return _pathCompressionFind(node);
+            return _pathCompressionFind(node).leader;
         }
 
         // This performs path compression. Rank remains unchanged during path compression.
@@ -58,8 +58,8 @@ public interface UnionFind<V> {
 
         @Override
         public void union(V x, V y) {
-            Leader<V> xLeader = find(x);
-            Leader<V> yLeader = find(y);
+            Leader<V> xLeader = _pathCompressionFind(x);
+            Leader<V> yLeader = _pathCompressionFind(y);
             if (xLeader == yLeader) {
                 System.out.println(x + " and " + y + " are already in same group");
                 return;

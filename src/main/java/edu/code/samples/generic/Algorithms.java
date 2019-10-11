@@ -1,5 +1,7 @@
 package edu.code.samples.generic;
 
+import java.util.Random;
+
 public class Algorithms {
 
     /**
@@ -50,6 +52,14 @@ public class Algorithms {
         if (mFrequency >= array.length/2) {
             return mElement;
         }
-        return -Integer.MIN_VALUE;
+        return Integer.MIN_VALUE;
+    }
+
+    public static void shuffleArray(int[] array) {
+        Random random = new Random(System.currentTimeMillis());
+        for (int end = array.length-1; end > 0; end--) {
+            int randomIndex = random.nextInt(end);
+            Utils.swap(array, randomIndex, end);
+        }
     }
 }

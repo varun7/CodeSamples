@@ -2155,6 +2155,65 @@ public class LeetCodeProblems {
                 return -1;
             }
         }
+
+        static class TreeSetSolution {
+            class Project {
+                int capital;
+                int profit;
+
+                public Project(int c, int p) {
+                    this.capital = c;
+                    this.profit = p;
+                }
+            }
+
+            /**
+             * TreeSet doesn't use equals method instead use the CompareTo method
+             * for checking if the item exist. Hence, we have to maintain the equals
+             * functionality in compareTo method itself.
+             * https://stackoverflow.com/questions/16593406/treeset-add-returning-false
+             */
+            Comparator<Project> capComp = (a, b) -> {
+                if (a.capital == b.capital && a.profit == b.profit) {
+                    return a.hashCode() - b.hashCode();
+                }
+
+                if (a.capital == b.capital) {
+                    return b.profit - a.profit;
+                }
+                return a.capital - b.capital;
+            };
+            Comparator<Project> profitComp = (a,b) -> b.profit - a.profit;
+
+            public int findMaximizedCapital(int k, int cap, int[] profits, int[] capital) {
+
+                // Initialization.
+                TreeSet<Project> allProjects = new TreeSet<>(capComp);
+                boolean added = false;
+                for (int i=0; i<capital.length; i++) {
+                    added = false;
+                    added = allProjects.add(new Project(capital[i], profits[i]));
+                }
+                System.out.println(added);
+
+                // Create a Priority queue and add all projects with capital less than equal to cap.
+                PriorityQueue<Project> projects = new PriorityQueue<>(profitComp);
+                addProjectsToQueue(projects, allProjects, cap);
+
+                while (k > 0 && !projects.isEmpty()) {
+                    cap += projects.poll().profit;
+                    k--;
+                    addProjectsToQueue(projects, allProjects, cap);
+                }
+                return cap;
+            }
+
+            private void addProjectsToQueue(PriorityQueue<Project> projects, TreeSet<Project> allProjects, int cap) {
+                while (!allProjects.isEmpty() && allProjects.first().capital <= cap) {
+                    projects.offer(allProjects.pollFirst());
+                }
+            }
+        }
     }
 
 
@@ -6688,6 +6747,62 @@ public class LeetCodeProblems {
                 maxFruits = Math.max(maxFruits, j - i + 1);
             }
             return maxFruits;
+        }
+    }
+
+
+    /**
+     * https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/
+     * There are a number of spherical balloons spread in two-dimensional space. For each balloon, provided input is the
+     * start and end coordinates of the horizontal diameter. Since it's horizontal, y-coordinates don't matter and
+     * hence the x-coordinates of start and end of the diameter suffice. Start is always smaller than end.
+     * There will be at most 104 balloons.
+     *
+     * An arrow can be shot up exactly vertically from different points along the x-axis. A balloon with xstart and xend
+     * bursts by an arrow shot at x if xstart ≤ x ≤ xend. There is no limit to the number of arrows that can be shot.
+     * An arrow once shot keeps travelling up infinitely. The problem is to find the minimum number of arrows that
+     * must be shot to burst all balloons.
+     *
+     * Example:
+     *
+     * Input:
+     * [[10,16], [2,8], [1,6], [7,12]]
+     *
+     * Output:
+     * 2
+     *
+     * Explanation:
+     * One way is to shoot one arrow for example at x = 6 (bursting the balloons [2,8] and [1,6]) and another arrow at x = 11 (bursting the other two balloons).
+     */
+    static class MinimmumNumberOfArrowsToBurstBalloons {
+        Comparator<int[]> comp = (a,b) -> {
+            if (a[0] != b[0]) {
+                return Integer.compare(a[0], b[0]);
+            }
+            return Integer.compare(a[1], b[1]);
+        };
+        public int findMinArrowShots(int[][] points) {
+            if (points.length == 0) {
+                return 0;
+            }
+            Arrays.sort(points, comp);
+            int prevS = points[0][0];
+            int prevE = points[0][1];
+            int count = 1;
+
+            for (int i=1; i<points.length; i++) {
+                // If they overlap
+                if (prevE >= points[i][0]) {
+                    prevS = Math.max(prevS, points[i][0]);
+                    prevE = Math.min(prevE, points[i][1]);
+                } else {
+                    prevS = points[i][0];
+                    prevE = points[i][1];
+                    count++;
+                }
+            }
+
+            return count;
         }
     }
 }

@@ -297,28 +297,28 @@ public class Main {
 
     private static void unionFindDemo() {
         UnionFind<Integer> rankedUnion = new UnionFind.RankedUnion<>(Arrays.asList(1,2,3,4,5,6,7));
-        System.out.println("Leader of 1 = " + rankedUnion.find(1).leader + " rank = " + rankedUnion.find(1).rank);
-        System.out.println("Leader of 2 = " + rankedUnion.find(2).leader + " rank = " + rankedUnion.find(2).rank);
+        System.out.println("Leader of 1 = " + rankedUnion.find(1));
+        System.out.println("Leader of 2 = " + rankedUnion.find(2));
 
         rankedUnion.union(1,2);
         System.out.println("\n\nMerging 1 and 2");
-        System.out.println("Leader of 1 = " + rankedUnion.find(1).leader + " rank = " + rankedUnion.find(1).rank);
-        System.out.println("Leader of 2 = " + rankedUnion.find(2).leader + " rank = " + rankedUnion.find(2).rank);
+        System.out.println("Leader of 1 = " + rankedUnion.find(1));
+        System.out.println("Leader of 2 = " + rankedUnion.find(2));
 
         rankedUnion.union(2,3);
         System.out.println("\n\nMerging 2 and 3");
-        System.out.println("Leader of 2 = " + rankedUnion.find(2).leader + " rank = " + rankedUnion.find(2).rank);
-        System.out.println("Leader of 3 = " + rankedUnion.find(3).leader + " rank = " + rankedUnion.find(3).rank);
+        System.out.println("Leader of 2 = " + rankedUnion.find(2));
+        System.out.println("Leader of 3 = " + rankedUnion.find(3));
 
         rankedUnion.union(4,5);
         System.out.println("\n\nMerging 4 and 5");
-        System.out.println("Leader of 4 = " + rankedUnion.find(4).leader + " rank = " + rankedUnion.find(4).rank);
-        System.out.println("Leader of 5 = " + rankedUnion.find(5).leader + " rank = " + rankedUnion.find(5).rank);
+        System.out.println("Leader of 4 = " + rankedUnion.find(4));
+        System.out.println("Leader of 5 = " + rankedUnion.find(5));
 
         rankedUnion.union(2,5);
         System.out.println("\n\nMerging 4 and 5");
-        System.out.println("Leader of 2 = " + rankedUnion.find(2).leader + " rank = " + rankedUnion.find(2).rank);
-        System.out.println("Leader of 5 = " + rankedUnion.find(5).leader + " rank = " + rankedUnion.find(5).rank);
+        System.out.println("Leader of 2 = " + rankedUnion.find(2));
+        System.out.println("Leader of 5 = " + rankedUnion.find(5));
 
         System.out.println("\n\nMerging 1 and 5");
         rankedUnion.union(1,5);

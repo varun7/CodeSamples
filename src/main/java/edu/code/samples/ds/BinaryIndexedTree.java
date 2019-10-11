@@ -13,20 +13,12 @@ public interface BinaryIndexedTree {
             this.input = input;
             tree = new int[input.length+1];
             constructTree();
-            printTree();
         }
 
         private void constructTree() {
             this.tree = new int[input.length + 1];
             for (int i = 0; i < input.length; i++) {
                 update(i+1, input[i]);
-            }
-        }
-
-        private void printTree() {
-            System.out.println("\nPrinting Fenwick tree:");
-            for (int i = 0; i < tree.length; i++) {
-                System.out.print(tree[i] + " ");
             }
         }
 

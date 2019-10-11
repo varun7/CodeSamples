@@ -13,7 +13,6 @@ public class BinaryIndexedTree2D {
         cols = input[0].length + 1;
         this.tree = new int[rows][cols];
         constructTree();
-        printTree();
     }
 
     public void update(int xIndex, int yIndex, int val) {
@@ -42,14 +41,4 @@ public class BinaryIndexedTree2D {
             }
         }
     }
-
-    private void printTree() {
-        for (int i = 0; i < rows; i ++) {
-            System.out.println();
-            for (int j = 0; j < cols; j++) {
-                System.out.print(tree[i][j] + " ");
-            }
-        }
-    }
-
 }
