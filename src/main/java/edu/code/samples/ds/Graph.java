@@ -36,7 +36,9 @@ public interface Graph<V> {
 
     Map<V, Double> dijkstra(V source);
 
-    void mstPrims();
+    double mstPrims();
+
+    double kruskal();
 
     /**
      * Only for directed graph.
@@ -52,14 +54,17 @@ public interface Graph<V> {
         class Edge {
             private final double weight;
             private final V to;
+            private final V from;
 
-            public Edge(V to, double weight) {
+            public Edge(V from, V to, double weight) {
+                this.from = from;
                 this.weight = weight;
                 this.to = to;
             }
 
 
-            public Edge(V to) {
+            public Edge(V from, V to) {
+                this.from = from;
                 this.weight = 1;
                 this.to = to;
             }
@@ -98,6 +103,14 @@ public interface Graph<V> {
             return vertexMap.keySet();
         }
 
+        protected Set<Edge> edges() {
+            Set<Edge> edgeSet = new HashSet<>();
+            for (Map.Entry<V, Set<Edge>> entry: vertexMap.entrySet()) {
+                edgeSet.addAll(entry.getValue());
+            }
+            return edgeSet;
+        }
+
         @Override
         public Set<V> successors(V vertex) {
             if (isPresent(vertex)) {
@@ -128,10 +141,10 @@ public interface Graph<V> {
             if (!isPresent(v1) || !isPresent(v2)) {
                 throw new IllegalArgumentException("One or both node not present in graph.");
             }
-            vertexMap.get(v1).add(new Edge(v2));
+            vertexMap.get(v1).add(new Edge(v1, v2));
 
             if (!isDirected) {
-                vertexMap.get(v2).add(new Edge(v1));
+                vertexMap.get(v2).add(new Edge(v2, v1));
             }
         }
 
@@ -140,10 +153,10 @@ public interface Graph<V> {
             if (!isPresent(v1) || !isPresent(v2)) {
                 throw new IllegalArgumentException("One or both node not present in graph.");
             }
-            vertexMap.get(v1).add(new Edge(v2, weight));
+            vertexMap.get(v1).add(new Edge(v1, v2, weight));
 
             if (!isDirected) {
-                vertexMap.get(v2).add(new Edge(v1, weight));
+                vertexMap.get(v2).add(new Edge(v2, v1, weight));
             }
         }
 
@@ -281,54 +294,60 @@ public interface Graph<V> {
 
         @Override
         public void topologicalSort() {
-            Set<V> explored = new HashSet<>();
-            V startingVertex = nextUnexploredNode(explored);
-            while(startingVertex != null) {
-                _topologicalSort(startingVertex, explored);
-                startingVertex = nextUnexploredNode(explored);
+            System.out.println("Topological sort of the graph");
+            Set<V> unexplored = new HashSet<>(this.vertices());
+            Stack<V> topologicalOrder = new Stack<>();
+            while(!unexplored.isEmpty()) {
+                V start = unexplored.stream().findAny().get();
+                _topologicalSort(start, unexplored, topologicalOrder);
+            }
+
+            while (!topologicalOrder.isEmpty()) {
+                System.out.print(topologicalOrder.pop() + " ");
             }
         }
 
-        private void _topologicalSort(V startingVertex, Set<V> explored) {
-            explored.add(startingVertex);
-            System.out.print(startingVertex + " ");
+        private void _topologicalSort(V startingVertex, Set<V> unexplored, Stack<V> topologicalOrder) {
+            unexplored.remove(startingVertex);
             for (V vertex: this.successors(startingVertex)) {
-                if (!explored.contains(vertex)) {
-                    _topologicalSort(vertex, explored);
+                if (unexplored.contains(vertex)) {
+                    _topologicalSort(vertex, unexplored, topologicalOrder);
                 }
             }
+            topologicalOrder.push(startingVertex);
         }
 
         @Override
         public boolean isCyclic() {
-            Set<V> explored = new HashSet<>();
-            Set<V> ancestor = new HashSet<>();
-            V startingVertex = nextUnexploredNode(explored);
-            while (startingVertex != null) {
-                if (_isCyclic(startingVertex, explored, ancestor)) {
+            Set<V> unexplored = new HashSet<>(this.vertices());
+            while (!unexplored.isEmpty()) {
+                V startingVertex = unexplored.stream().findAny().get();
+                if (_isCyclic(startingVertex, unexplored, new HashSet<>())) {
                     return true;
                 }
-                startingVertex = nextUnexploredNode(explored);
             }
             return false;
         }
 
-        private boolean _isCyclic(V startingVertex, Set<V> explored, Set<V> ancestor) {
+        private boolean _isCyclic(V startingVertex, Set<V> unexplored, Set<V> ancestor) {
             if (ancestor.contains(startingVertex)) {
                 return true;
             }
-            explored.add(startingVertex);
+
+            if (!unexplored.contains(startingVertex)) {
+                return false;
+            }
+            unexplored.remove(startingVertex);
             ancestor.add(startingVertex);
 
             for(V vertex: this.successors(startingVertex)) {
-                // check for self-loop.
-                if (vertex == startingVertex) {
-                    return true;
-                }
-                if (!explored.contains(vertex) && _isCyclic(vertex, explored, ancestor)) {
+                // check for self-loop and cycles.
+                if (vertex == startingVertex || _isCyclic(vertex, unexplored, ancestor)) {
                     return true;
                 }
             }
+            // Now that all it's child nodes have been processed and none of them have had a back edge
+            // Remove this vertex from the ancestor set.
             ancestor.remove(startingVertex);
             return false;
         }
@@ -409,67 +428,78 @@ public interface Graph<V> {
             return distances;
         }
 
-        private class Pair<T,U> {
-            private T first;
-            private U second;
+        private class Pair {
+            public V node;
+            public double distance;
 
-            public Pair(T first, U second) {
-                this.first = first;
-                this.second = second;
-            }
-
-            public T getFirst() {
-                return first;
-            }
-
-            public U getSecond() {
-                return second;
-            }
-
-            @Override
-            public int hashCode() {
-                return first.hashCode();
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                return first.equals(((Pair) obj).getFirst());
+            public Pair(V first, double second) {
+                this.node = first;
+                this.distance = second;
             }
         }
 
         @Override
         public Map<V, Double> dijkstra(V source) {
             final Double INF = Double.MAX_VALUE - 1;
-            Set<V> explored = new HashSet<>();
 
             // Initializations.
+            Set<V> explored = new HashSet<>();
             Map<V, Double> distances = this.vertices().stream().collect(Collectors.toMap(v -> v, v-> INF));
             distances.put(source, 0d);
-
-            // Treeset and TreeMap both are implemented on balanced binary search tree.
-            TreeSet<Pair<V, Double>> treeSet = new TreeSet<>((p, q) -> Double.compare(p.getSecond(), q.getSecond()));
-            this.vertices().stream().forEach(v -> treeSet.add(new Pair<>(v, INF)));
-            treeSet.add(new Pair<>(source, 0d));
+            TreeSet<Pair> treeSet = createTreeSet(source);
 
             // We will take one vertex from unexplored and move it to explored set.
             while (!treeSet.isEmpty()) {
 
                 // Remove minimum distance vertex and mark it as explored.
-                Pair<V, Double> candidate = treeSet.pollFirst(); // Removes the first element from the tree, replacement of lowest function.
-                explored.add(candidate.getFirst());
+                Pair candidate = treeSet.pollFirst();
+                explored.add(candidate.node);
 
                 // Revisit distance of all neighbors of candidate.
-                this.successors(candidate.getFirst())
+                this.successors(candidate.node)
                         .stream()
                         .filter(v -> !explored.contains(v))
                         .forEach(v -> {
-                            Double neighborDistance = distances.get(candidate.getFirst()) + this.edgeWeight(candidate.getFirst(), v);
+                            Double neighborDistance = distances.get(candidate.node) + this.edgeWeight(candidate.node, v);
                             if (distances.get(v) > neighborDistance) {
                                 distances.put(v, neighborDistance);
-                                treeSet.add(new Pair<>(v, neighborDistance));
+
+                                // Update tree set.
+                                Pair newPair = new Pair(v, neighborDistance);
+                                treeSet.remove(newPair);
+                                treeSet.add(newPair);
                             }
                         });
 
+            }
+            return distances;
+        }
+
+        protected Map<V, Double> bellManFord(V source) {
+            // Step-1: Inititalization.
+            Double INF = 1000d;
+            Map<V, Double> distances = this.vertices().stream()
+                    .filter(v -> !v.equals(source))
+                    .collect(Collectors.toMap(v -> v, v -> INF));
+            distances.put(source, 0d);
+
+            // Step-2: Relax edges repeatedly.
+            for (int i=0; i< this.vertices().size(); i++) {
+                for (Edge e: edges()) {
+                    double neighbourDistance = e.weight + distances.get(e.from);
+                    if (neighbourDistance < distances.get(e.to)) {
+                        distances.put(e.to, neighbourDistance);
+                    }
+                }
+            }
+
+            // Step:-3: Check for negative weight cycles.
+            for (Edge e: edges()) {
+                double neighbourDistance = e.weight + distances.get(e.from);
+                if (neighbourDistance < distances.get(e.to)) {
+                    System.out.println("Graph contains negative weight cycle.");
+                    throw new IllegalArgumentException("Graph contains negative weight cycle.");
+                }
             }
             return distances;
         }
@@ -491,7 +521,9 @@ public interface Graph<V> {
         }
 
         @Override
-        public void mstPrims() {
+        public double mstPrims() {
+            System.out.println("\n\nNaive implementation of prims:");
+
             // Step-1 initializations.
             V source = this.vertices().stream().findAny().get();
             Set<V> unexplored = this.vertices().stream()
@@ -501,6 +533,7 @@ public interface Graph<V> {
             Map<V, Double> distances = unexplored.stream()
                     .collect(Collectors.toMap(v -> v, v -> Double.MAX_VALUE -1 ));
             distances.put(source, 0d);
+            double mstCost = 0;
 
             // At every iteration we move a vertex from unexplored to explored set.
             while (!unexplored.isEmpty()) {
@@ -509,6 +542,7 @@ public interface Graph<V> {
                 explored.add(candidate);
                 unexplored.remove(candidate);
 
+                mstCost += distances.get(candidate);
                 System.out.println(candidate + " cost = " + distances.get(candidate));
 
                 // Step-3: For the newly explored vertex re-compute the distances.
@@ -521,6 +555,99 @@ public interface Graph<V> {
                             }
                         });
             }
+            System.out.println("mst cost = " + mstCost);
+            return mstCost;
+        }
+
+        // Efficient implememtation of prims using TreeSet.
+        // Returns cost of minimum spanning tree.
+        protected double prims() {
+            System.out.println("\n\nPrims using balanced binary search tree:");
+            Double INF = 10000d;
+
+            // Initialization.
+            V source = this.vertices().stream().findAny().get();
+            TreeSet<Pair> treeSet = createTreeSet(source);
+            Set<V> explored = new HashSet<>();
+            Map<V, Double> distances = this.vertices().stream().collect(Collectors.toMap(v -> v, v-> INF));
+            distances.put(source, 0d);
+
+            double mstCost = 0;
+
+            while (!treeSet.isEmpty()) {
+                // Step-2: Pick unexplored vertex at minimum distance from explored set of vertices.
+                Pair candidate = treeSet.pollFirst();
+                explored.add(candidate.node);
+
+                mstCost += distances.get(candidate.node);
+                System.out.println(candidate.node + " cost = " + distances.get(candidate.node));
+
+                // Step-3: For the newly explored vertex re-compute the distances.
+                this.successors(candidate.node).stream()
+                        .filter(v -> !explored.contains(v))
+                        .forEach(v -> {
+                                double neighborDistance = this.edgeWeight(candidate.node, v);
+                                if (neighborDistance < distances.get(v)) {
+                                    distances.put(v, neighborDistance);
+
+                                    // Update tree set.
+                                    Pair newPair = new Pair(v, neighborDistance);
+                                    treeSet.remove(newPair);
+                                    treeSet.add(newPair);
+                                }
+                        });
+            }
+            System.out.println("mst cost = " + mstCost);
+            return mstCost;
+        }
+
+        private TreeSet<Pair> createTreeSet(V source) {
+            Double INF = 10000d;
+
+            // So if there are 2 nodes in graph with same distance
+            // from origin then only one entry will be made, it can be fixed by updating
+            // compare method to act as equals also.
+            Comparator<Pair> comp = (p,q) -> {
+                if (p.node == q.node) {
+                    return 0;
+                }
+                if (p.distance == q.distance) {
+                    return p.hashCode() - q.hashCode();
+                }
+                return Double.compare(p.distance, q.distance);
+            };
+
+            // Treeset and TreeMap both are implemented on balanced binary search tree.
+            // We are using treeSet to optimally obtain lowest distance node.
+            TreeSet<Pair> treeSet = new TreeSet<>(comp);
+            this.vertices().stream().filter(v -> !v.equals(source)).forEach(v -> treeSet.add(new Pair(v, INF)));
+            treeSet.add(new Pair(source, 0d));
+
+            return treeSet;
+        }
+
+        // Returns cost of minimum spanning tree.
+        @Override
+        public double kruskal() {
+            // Initialization.
+            UnionFind<V> group = new UnionFind.RankedUnion<>(new HashSet<>(this.vertices()));
+            PriorityQueue<Edge> queue = new PriorityQueue<>((a,b) -> Double.compare(a.weight, b.weight));
+            queue.addAll(this.edges());
+            double mstCost = 0;
+
+            while (!queue.isEmpty()) {
+                Edge edge = queue.poll();
+                V fromGroup = group.find(edge.from);
+                V toGroup = group.find(edge.to);
+
+                if (fromGroup != toGroup) {
+                    System.out.println("Edge from : " + edge.from + " to : " + edge.to + " added to Spanning tree with cost = " + edge.weight);
+                    mstCost += edge.weight;
+                    group.union(edge.from, edge.to);
+                }
+            }
+            System.out.println("mst cost = " + mstCost);
+            return mstCost;
         }
 
         private V nextUnexploredNode(Set<V> explored) {
